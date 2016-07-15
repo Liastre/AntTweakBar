@@ -1133,7 +1133,7 @@ int CTwVar::SetAttrib(int _AttribID, const char *_Value, TwBar *_Bar, struct CTw
                 return 1;
             }
         }
-        // todo: general 'order' command (no else)
+        // TODO: general 'order' command (no else)
         return 0;
     case V_VISIBLE:
         if( _Value!=NULL && strlen(_Value)>0 )
@@ -5468,7 +5468,7 @@ void CTwBar::Draw(int _DrawPart)
 
 //  ---------------------------------------------------------------------------
 
-void TwBar::CheckScrollbar(int NbHierLinesDelta)
+void CTwBar::CheckScrollbar(int NbHierLinesDelta)
 {
     if( m_FirstLine>m_NbHierLines+NbHierLinesDelta-m_NbDisplayedLines )
         m_FirstLine = m_NbHierLines+NbHierLinesDelta-m_NbDisplayedLines;
@@ -5533,7 +5533,7 @@ bool CTwBar::MouseMotion(int _X, int _Y)
                     {
                         if( static_cast<CTwVarAtom *>(m_HierTags[m_HighlightedLine].m_Var)->m_ReadOnly && !m_IsHelpBar 
                             && !(static_cast<CTwVarAtom *>(m_HierTags[m_HighlightedLine].m_Var)->m_Type==TW_TYPE_BUTTON && static_cast<CTwVarAtom *>(m_HierTags[m_HighlightedLine].m_Var)->m_Val.m_Button.m_Callback==NULL) )
-                            ANT_SET_CURSOR(No); //(Arrow);
+                            ANT_SET_CURSOR(No);//was (Arrow);
                         else
                         {
                             ANT_SET_CURSOR(Arrow);
@@ -5551,18 +5551,21 @@ bool CTwBar::MouseMotion(int _X, int _Y)
                             CustomArea = false;
                         }
                     }
-                    else if( m_DrawRotoBtn && ( _X>=m_PosX+m_VarX2-IncrBtnWidth(m_Font->m_CharHeight) || _X<m_PosX+m_VarX1 ) )  // [o] button
-                    //else if( m_DrawRotoBtn && _X<m_PosX+m_VarX1 ) // [o] button
+                    // [o] button
+                    else if( m_DrawRotoBtn && ( _X>=m_PosX+m_VarX2-IncrBtnWidth(m_Font->m_CharHeight) || _X<m_PosX+m_VarX1 ) )
+                    //else if( m_DrawRotoBtn && _X<m_PosX+m_VarX1 )
                     {
                         m_HighlightRotoBtn = true;
                         ANT_SET_CURSOR(Point);
                     }
-                    else if( m_DrawIncrDecrBtn && _X>=m_PosX+m_VarX2-2*IncrBtnWidth(m_Font->m_CharHeight) ) // [+] button
+                    // [+] button
+                    else if( m_DrawIncrDecrBtn && _X>=m_PosX+m_VarX2-2*IncrBtnWidth(m_Font->m_CharHeight) )
                     {
                         m_HighlightIncrBtn = true;
-                        ANT_SET_CURSOR(Arrow);
+                        ANT_SET_CURSOR(Arrow);//(Arrow);
                     }
-                    else if( m_DrawIncrDecrBtn && _X>=m_PosX+m_VarX2-3*IncrBtnWidth(m_Font->m_CharHeight) ) // [-] button
+                    // [-] button
+                    else if( m_DrawIncrDecrBtn && _X>=m_PosX+m_VarX2-3*IncrBtnWidth(m_Font->m_CharHeight) )
                     {
                         m_HighlightDecrBtn = true;
                         ANT_SET_CURSOR(Arrow);
@@ -5603,7 +5606,8 @@ bool CTwBar::MouseMotion(int _X, int _Y)
             else if( InBar && m_NbDisplayedLines<m_NbHierLines && _X>=m_PosX+m_VarX2+2 && _X<m_PosX+m_Width-2 && _Y>=m_ScrollY0 && _Y<m_ScrollY1 )
             {
                 m_HighlightScroll = true;
-              #ifdef ANT_WINDOWS
+                //TODO: probably some wrong definitions
+              #ifdef ANT_WINDOWS/*_WIN32*/
                 ANT_SET_CURSOR(NS);
               #else
                 ANT_SET_CURSOR(Arrow);
@@ -6508,35 +6512,40 @@ bool CTwBar::MouseButton(ETwMouseButtonID _Button, bool _Pressed, int _X, int _Y
 
 //  ---------------------------------------------------------------------------
 
-bool CTwBar::MouseWheel(int _Pos, int _PrevPos, int _MouseX, int _MouseY)
+bool CTwBar::MouseWheel(int offsetY, int offsetX, int mouseX, int mouseY)
 {
+    // TODO: why we double check sizes?
     assert(g_TwMgr->m_Graph && g_TwMgr->m_WndHeight>0 && g_TwMgr->m_WndWidth>0);
     if( !m_UpToDate )
         Update();
-    
-    bool Handled = false;
-    if( !m_IsMinimized && _MouseX>=m_PosX && _MouseX<m_PosX+m_Width && _MouseY>=m_PosY && _MouseY<m_PosY+m_Height )
+
+    if( !m_IsMinimized && mouseX>=m_PosX && mouseX<m_PosX+m_Width && mouseY>=m_PosY && mouseY<m_PosY+m_Height )
     {
-        if( _Pos>_PrevPos && m_FirstLine>0 )
+        // change bar value if active
+        if( m_EditInPlace.m_Active )
+        {
+            editInPlaceStep(offsetY>0);
+            return true;
+        }
+
+        // scroll up
+        if( offsetY>0 && m_FirstLine>0 )
         {
             --m_FirstLine;
             NotUpToDate();
+            return true;
         }
-        else if( _Pos<_PrevPos && m_FirstLine<m_NbHierLines-m_NbDisplayedLines )
+
+        // scroll down
+        if( offsetY<0 && m_FirstLine<m_NbHierLines-m_NbDisplayedLines )
         {
             ++m_FirstLine;
             NotUpToDate();
-        }
-
-        if( _Pos!=_PrevPos )
-        {
-            Handled = true;
-            if( m_EditInPlace.m_Active )
-                EditInPlaceEnd(true);
+            return true;
         }
     }
 
-    return Handled;
+    return false;
 }
 
 //  ---------------------------------------------------------------------------
@@ -7523,6 +7532,88 @@ void CTwBar::EditInPlaceEnd(bool _Commit)
     }
     m_EditInPlace.m_Active = false;
     m_EditInPlace.m_Var = NULL;
+}
+
+void CTwBar::
+editInPlaceStep(bool stepDirection)
+{
+    if(m_EditInPlace.m_Active && m_EditInPlace.m_Var!=NULL )
+    {
+        if( m_EditInPlace.m_Var->m_Type==TW_TYPE_CDSTRING || m_EditInPlace.m_Var->m_Type==TW_TYPE_CDSTDSTRING )
+        {
+            if( m_EditInPlace.m_Var->m_SetCallback!=NULL )
+            {
+                const char *String = m_EditInPlace.m_String.c_str();
+                m_EditInPlace.m_Var->m_SetCallback(&String, m_EditInPlace.m_Var->m_ClientData);
+            }
+            else if( m_EditInPlace.m_Var->m_Type!=TW_TYPE_CDSTDSTRING )
+            {
+                char **StringPtr = (char **)m_EditInPlace.m_Var->m_Ptr;
+                if( StringPtr!=NULL && g_TwMgr->m_CopyCDStringToClient!=NULL )
+                    g_TwMgr->m_CopyCDStringToClient(StringPtr, m_EditInPlace.m_String.c_str());
+            }
+        }
+        else if( m_EditInPlace.m_Var->m_Type==TW_TYPE_STDSTRING )
+        {
+            // this case should never happened: TW_TYPE_STDSTRING are converted to TW_TYPE_CDSTDSTRING by TwAddVar
+            if( m_EditInPlace.m_Var->m_SetCallback!=NULL )
+                m_EditInPlace.m_Var->m_SetCallback(&(m_EditInPlace.m_String), m_EditInPlace.m_Var->m_ClientData);
+            else
+            {
+                string *StringPtr = (string *)m_EditInPlace.m_Var->m_Ptr;
+                if( StringPtr!=NULL && g_TwMgr->m_CopyStdStringToClient!=NULL )
+                    g_TwMgr->m_CopyStdStringToClient(*StringPtr, m_EditInPlace.m_String);
+            }
+        }
+        else if( IsCSStringType(m_EditInPlace.m_Var->m_Type) )
+        {
+            int n = TW_CSSTRING_SIZE(m_EditInPlace.m_Var->m_Type);
+            if( n>0 )
+            {
+                if( (int)m_EditInPlace.m_String.length()>n-1 )
+                    m_EditInPlace.m_String.resize(n-1);
+                if( m_EditInPlace.m_Var->m_SetCallback!=NULL )
+                    m_EditInPlace.m_Var->m_SetCallback(m_EditInPlace.m_String.c_str(), m_EditInPlace.m_Var->m_ClientData);
+                else if( m_EditInPlace.m_Var->m_Ptr!=NULL )
+                {
+                    if( n>1 )
+                        strncpy((char *)m_EditInPlace.m_Var->m_Ptr, m_EditInPlace.m_String.c_str(), n-1);
+                    ((char *)m_EditInPlace.m_Var->m_Ptr)[n-1] = '\0';
+                }
+            }
+        }
+        else
+        {
+            double Val = 0, Min = 0, Max = 0, Step = 0;
+            int n = 0;
+            if( m_EditInPlace.m_Var->m_Type==TW_TYPE_CHAR )
+            {
+                unsigned char Char = 0;
+                n = sscanf(m_EditInPlace.m_String.c_str(), "%c", &Char);
+                Val = Char;
+            }
+            else
+                n = sscanf(m_EditInPlace.m_String.c_str(), "%lf", &Val);
+            if( n==1 )
+            {
+                m_EditInPlace.m_Var->MinMaxStepToDouble(&Min, &Max, &Step);
+                if( stepDirection )
+                    //TODO: value does not changes
+                    Val+=Step;
+                else
+                    Val-=Step;
+                if( Val<Min )
+                    Val = Min;
+                if( Val>Max )
+                    Val = Max;
+                m_EditInPlace.m_Var->ValueFromDouble(Val);
+            }
+        }
+        if( g_TwMgr!=NULL ) // Mgr might have been destroyed by the client inside a callback call
+            NotUpToDate();
+    }
+    //m_EditInPlace.m_Active = false;
+    //m_EditInPlace.m_Var = NULL;
 }
 
 bool CTwBar::EditInPlaceKeyPressed(int _Key, int _Modifiers)

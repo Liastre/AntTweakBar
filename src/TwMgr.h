@@ -10,11 +10,12 @@
 //
 //  ---------------------------------------------------------------------------
 
-
 #if !defined ANT_TW_MGR_INCLUDED
 #define ANT_TW_MGR_INCLUDED
 
 #include <AntTweakBar.h>
+#include "MiniFloat.hpp"
+
 #define ANT_CALL TW_CALL
 
 #include "TwColors.h"
@@ -493,27 +494,26 @@ struct CQuaternionExt
 //  (could be useful because DirectX changes it and AntTweakBar requires default double precision)
 //  ---------------------------------------------------------------------------
 
-
 struct CTwFPU
 {
     CTwFPU()    
     { 
-    #ifdef ANT_WINDOWS
+    /*#ifdef ANT_WINDOWS
         state0 = _controlfp(0, 0); 
-        if( (state0&MCW_PC)==_PC_24 )   // we need at least _PC_53
-            _controlfp(_PC_53, MCW_PC);
+        if( (state0&_MCW_PC)==_PC_24 )   // we need at least _PC_53
+            _controlfp(_PC_53, _MCW_PC);
     #else
         state0 = 0;
-    #endif
+    #endif*/
     }
     ~CTwFPU()
     {
-    #ifdef ANT_WINDOWS      
+    /*#ifdef ANT_WINDOWS
         if( (state0&MCW_PC)==_PC_24 )
             _controlfp(_PC_24, MCW_PC);
     #else
         state0 = 0;
-    #endif
+    #endif*/
     }
 private:
     unsigned int state0;

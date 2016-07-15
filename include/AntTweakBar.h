@@ -16,10 +16,11 @@
 //
 // ----------------------------------------------------------------------------
 
-
-#if !defined TW_INCLUDED
+#ifndef TW_INCLUDED
 #define TW_INCLUDED
 
+#include "ATBConfig.hpp"
+#include "ATBIncludes.hpp"
 #include <stddef.h>
 
 #define TW_VERSION  116 // Version Mmm : M=Major mm=minor (e.g., 102 is version 1.02)
@@ -39,10 +40,18 @@
 
 
 // ----------------------------------------------------------------------------
-//  OS specific definitions
+//  OS specific includes and definitions
 // ----------------------------------------------------------------------------
 
-#if (defined(_WIN32) || defined(_WIN64)) && !defined(TW_STATIC)
+#if (defined(_WIN32) || defined(_WIN64))
+#   include <windows.h>
+#endif
+
+// ----------------------------------------------------------------------------
+//  OS specific includes and definitions
+// ----------------------------------------------------------------------------
+
+#if (defined(_MSC_VER) && !defined(TW_STATIC))
 #   define TW_CALL          __stdcall
 #   define TW_CDECL_CALL    __cdecl
 #   define TW_EXPORT_API    __declspec(dllexport)
@@ -54,26 +63,18 @@
 #   define TW_IMPORT_API
 #endif
 
+/*#ifdef MYDLL_EXPORTS
+#define MYDLL_API __declspec(dllexport)
+#else
+#define MYDLL_API __declspec(dllimport)
+#endif*/
+
 #if defined TW_EXPORTS
 #   define TW_API TW_EXPORT_API
 #elif defined TW_STATIC
 #   define TW_API
-#   if defined(_MSC_VER) && !defined(TW_NO_LIB_PRAGMA)
-#       ifdef _WIN64
-#           pragma comment(lib, "AntTweakBarStatic64")
-#       else
-#           pragma comment(lib, "AntTweakBarStatic")
-#       endif
-#   endif
 #else
 #   define TW_API TW_IMPORT_API
-#   if defined(_MSC_VER) && !defined(TW_NO_LIB_PRAGMA)
-#       ifdef _WIN64
-#           pragma comment(lib, "AntTweakBar64")
-#       else
-#           pragma comment(lib, "AntTweakBar")
-#       endif
-#   endif
 #endif
 
 
@@ -301,47 +302,43 @@ TW_API void     TW_CALL TwHandleErrors(TwErrorHandler errorHandler);
 // For libSDL event loop
 TW_API int      TW_CALL TwEventSDL(const void *sdlEvent, unsigned char sdlMajorVersion, unsigned char sdlMinorVersion);
 
-// For GLFW event callbacks
-// You should define GLFW_CDECL before including AntTweakBar.h if your version of GLFW uses cdecl calling convensions
-#ifdef GLFW_CDECL
-    TW_API int TW_CDECL_CALL TwEventMouseButtonGLFWcdecl(int glfwButton, int glfwAction);
-    TW_API int TW_CDECL_CALL TwEventKeyGLFWcdecl(int glfwKey, int glfwAction);
-    TW_API int TW_CDECL_CALL TwEventCharGLFWcdecl(int glfwChar, int glfwAction);
-    TW_API int TW_CDECL_CALL TwEventMousePosGLFWcdecl(int mouseX, int mouseY);
-    TW_API int TW_CDECL_CALL TwEventMouseWheelGLFWcdecl(int wheelPos);
-#   define TwEventMouseButtonGLFW TwEventMouseButtonGLFWcdecl
-#   define TwEventKeyGLFW         TwEventKeyGLFWcdecl
-#   define TwEventCharGLFW        TwEventCharGLFWcdecl
-#   define TwEventMousePosGLFW    TwEventMousePosGLFWcdecl
-#   define TwEventMouseWheelGLFW  TwEventMouseWheelGLFWcdecl
-#else
-    TW_API int  TW_CALL TwEventMouseButtonGLFW(int glfwButton, int glfwAction);
-    TW_API int  TW_CALL TwEventKeyGLFW(int glfwKey, int glfwAction);
-    TW_API int  TW_CALL TwEventCharGLFW(int glfwChar, int glfwAction);
-#   define TwEventMousePosGLFW     TwMouseMotion
-#   define TwEventMouseWheelGLFW   TwMouseWheel
+// GLFW event callbacks
+#ifdef ANTTWEAKBAR_USE_GLFW3
+    // standard callbacks
+    TW_IMPORT_API void twCursorPosCallbackGLFW(GLFWwindow* window, double xpos, double ypos);
+    TW_IMPORT_API void twMouseButtonCallbackGLFW (GLFWwindow* window, int button, int action, int mods);
+    TW_IMPORT_API void twScrollCallbackGLFW(GLFWwindow* window, double xoffset, double yoffset);
+    TW_IMPORT_API void twKeyCallbackGLFW(GLFWwindow* window, int key, int scancode, int action, int mods);
+    TW_IMPORT_API void twCharCallbackGLFW(GLFWwindow* window, unsigned int codepoint);
+    // debug callbacks, that returns error code
+    TW_IMPORT_API int twCursorPosCallbackGLFW_d(GLFWwindow* window, double xpos, double ypos);
+    TW_IMPORT_API int twMouseButtonCallbackGLFW_d(GLFWwindow* window, int button, int action, int mods);
+    TW_IMPORT_API int twScrollCallbackGLFW_d(GLFWwindow* window, double xoffset, double yoffset);
+    TW_IMPORT_API int twKeyCallbackGLFW_d(GLFWwindow* window, int key, int scancode, int action, int mods);
+    TW_IMPORT_API int twCharCallbackGLFW_d(GLFWwindow* window, unsigned int codepoint);
 #endif
 
-// For GLUT event callbacks (Windows calling convention for GLUT callbacks is cdecl)
-#if defined(_WIN32) || defined(_WIN64)
-#   define TW_GLUT_CALL TW_CDECL_CALL
-#else
-#   define TW_GLUT_CALL
+// GLUT event callbacks (Windows calling convention for GLUT callbacks is cdecl)
+#ifdef ANTTWEAKBAR_USE_GLUT
+    typedef void *GLUTmousebuttonfun (int glutButton, int glutState, int mouseX, int mouseY);
+    typedef void *GLUTmousemotionfun (int mouseX, int mouseY);
+    typedef void *GLUTkeyboardfun (unsigned char glutKey, int mouseX, int mouseY);
+    typedef void *GLUTspecialfun (int glutKey, int mouseX, int mouseY);
+    TW_IMPORT_API void twSetMouseButtonCallbackGLUT (int button, int state, int xpos, int ypos);
+    TW_IMPORT_API void twSetCursorPosCallbackGLUT (int xpos, int ypos);
+    #define twCursorPosCallbackGLUT      twSetCursorPosCallbackGLUT
+    #define twMouseButtonCallbackGLUT    twSetMouseButtonCallbackGLUT
+    /*TW_IMPORT_API int TW_GLUT_CALL TwEventMouseButtonGLUT(int glutButton, int glutState, int mouseX, int mouseY);
+    TW_IMPORT_API int TW_GLUT_CALL TwEventMouseMotionGLUT(int mouseX, int mouseY);
+    TW_IMPORT_API int TW_GLUT_CALL TwEventKeyboardGLUT(unsigned char glutKey, int mouseX, int mouseY);
+    TW_IMPORT_API int TW_GLUT_CALL TwEventSpecialGLUT(int glutKey, int mouseX, int mouseY);
+    TW_IMPORT_API int TW_CALL      TwGLUTModifiersFunc(int (TW_CALL *glutGetModifiersFunc)(void));*/
 #endif
-TW_API int TW_GLUT_CALL TwEventMouseButtonGLUT(int glutButton, int glutState, int mouseX, int mouseY);
-TW_API int TW_GLUT_CALL TwEventMouseMotionGLUT(int mouseX, int mouseY);
-TW_API int TW_GLUT_CALL TwEventKeyboardGLUT(unsigned char glutKey, int mouseX, int mouseY);
-TW_API int TW_GLUT_CALL TwEventSpecialGLUT(int glutKey, int mouseX, int mouseY);
-TW_API int TW_CALL      TwGLUTModifiersFunc(int (TW_CALL *glutGetModifiersFunc)(void));
-typedef void (TW_GLUT_CALL *GLUTmousebuttonfun)(int glutButton, int glutState, int mouseX, int mouseY);
-typedef void (TW_GLUT_CALL *GLUTmousemotionfun)(int mouseX, int mouseY);
-typedef void (TW_GLUT_CALL *GLUTkeyboardfun)(unsigned char glutKey, int mouseX, int mouseY);
-typedef void (TW_GLUT_CALL *GLUTspecialfun)(int glutKey, int mouseX, int mouseY);
 
-// For SFML event loop
+// SFML event loop
 TW_API int      TW_CALL TwEventSFML(const void *sfmlEvent, unsigned char sfmlMajorVersion, unsigned char sfmlMinorVersion);
 
-// For X11 event loop
+// X11 event loop
 #if defined(_UNIX)
     TW_API int TW_CDECL_CALL TwEventX11(void *xevent);
 #endif

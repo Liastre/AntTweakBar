@@ -251,7 +251,7 @@ int CTwGraphOpenGL::Shut()
 
 void CTwGraphOpenGL::BeginDraw(int _WndWidth, int _WndHeight)
 {
-    assert(m_Drawing==false && _WndWidth>0 && _WndHeight>0);
+    assert(!m_Drawing && _WndWidth>0 && _WndHeight>0);
     m_Drawing = true;
     m_WndWidth = _WndWidth;
     m_WndHeight = _WndHeight;

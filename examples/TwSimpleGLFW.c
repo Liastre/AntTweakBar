@@ -13,29 +13,24 @@
 //
 //  ---------------------------------------------------------------------------
 
-
 #include <AntTweakBar.h>
-
-#define GLFW_DLL
-#include "glfw.h"
 
 #include <stdio.h>
 
 
 // Callback function called by GLFW when window size changes
-void GLFWCALL WindowSizeCB(int width, int height)
+void windowSizeCallback(GLFWwindow* window, int width, int height)
 {
     // Set OpenGL viewport and camera
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(40, (double)width/height, 1, 10);
-    gluLookAt(-1,0,3, 0,0,0, 0,1,0);    
+    gluLookAt(-1,0,3, 0,0,0, 0,1,0);
     
     // Send the new window size to AntTweakBar
     TwWindowSize(width, height);
 }
-
 
 // This example program draws a possibly transparent cube 
 void DrawModel(int wireframe)
@@ -55,7 +50,7 @@ void DrawModel(int wireframe)
     
     if( wireframe )
     {
-        glDisable(GL_CULL_FACE);    
+        glDisable(GL_CULL_FACE);
         glDisable(GL_LIGHTING);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         numPass = 1;
@@ -86,87 +81,78 @@ void DrawModel(int wireframe)
     }
 }
 
-
 // Main
 int main() 
 {
-    GLFWvidmode mode;   // GLFW video mode
-    TwBar *bar;         // Pointer to a tweak bar
+    TwBar* bar;             // Pointer to a tweak bar
     
-    double time = 0, dt;// Current time and enlapsed time
-    double turn = 0;    // Model turn counter
-    double speed = 0.3; // Model rotation speed
-    int wire = 0;       // Draw model in wireframe?
+    double time = 0, dt;    // Current time and enlapsed time
+    double turn = 0;        // Model turn counter
+    double speed = 0.3;     // Model rotation speed
+    int isWireframe = 0;    // Draw model in wireframe?
     float bgColor[] = { 0.1f, 0.2f, 0.4f };         // Background color 
     unsigned char cubeColor[] = { 255, 0, 0, 128 }; // Model color (32bits RGBA)
 
-    // Intialize GLFW   
+    // Initialize GLFW
     if( !glfwInit() )
     {
-        // An error occured
+        // An error occurred
         fprintf(stderr, "GLFW initialization failed\n");
         return 1;
     }
 
     // Create a window
-    glfwGetDesktopMode(&mode);
-    if( !glfwOpenWindow(640, 480, mode.RedBits, mode.GreenBits, mode.BlueBits, 
-                        0, 16, 0, GLFW_WINDOW /* or GLFW_FULLSCREEN */) )
+    GLFWwindow* window;
+    window = glfwCreateWindow(64, 48, "AntTweakBar simple example using GLFW", NULL, NULL);
+    if( !window )
     {
-        // A fatal error occured    
+        // A fatal error occured
         fprintf(stderr, "Cannot open GLFW window\n");
         glfwTerminate();
-        return 1;
+        exit(EXIT_FAILURE);
     }
-    glfwEnable(GLFW_MOUSE_CURSOR);
-    glfwEnable(GLFW_KEY_REPEAT);
-    glfwSetWindowTitle("AntTweakBar simple example using GLFW");
+    glfwMakeContextCurrent(window);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     // Initialize AntTweakBar
     TwInit(TW_OPENGL, NULL);
 
     // Create a tweak bar
     bar = TwNewBar("TweakBar");
-    TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with GLFW and OpenGL.' "); // Message added to the help bar.
-
-    // Add 'speed' to 'bar': it is a modifable (RW) variable of type TW_TYPE_DOUBLE. Its key shortcuts are [s] and [S].
-    TwAddVarRW(bar, "speed", TW_TYPE_DOUBLE, &speed, 
-               " label='Rot speed' min=0 max=2 step=0.01 keyIncr=s keyDecr=S help='Rotation speed (turns/second)' ");
-
-    // Add 'wire' to 'bar': it is a modifable variable of type TW_TYPE_BOOL32 (32 bits boolean). Its key shortcut is [w].
-    TwAddVarRW(bar, "wire", TW_TYPE_BOOL32, &wire, 
-               " label='Wireframe mode' key=w help='Toggle wireframe display mode.' ");
-
+    // Message added to the help bar
+    TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with GLFW and OpenGL.' ");
+    // Add 'speed' to 'bar': it is a modifable (RW) variable of type TW_TYPE_DOUBLE. Its key shortcuts are [s] and [S]
+    TwAddVarRW(bar, "speed", TW_TYPE_DOUBLE, &speed, " label='Rot speed' min=0 max=2 step=0.01 keyIncr=s keyDecr=S help='Rotation speed (turns/second)' ");
+    // Add 'isWireframe' to 'bar': it is a modifable variable of type TW_TYPE_BOOL32 (32 bits boolean). Its key shortcut is [w]
+    TwAddVarRW(bar, "isWireframe", TW_TYPE_BOOL32, &isWireframe, " label='Wireframe mode' key=w help='Toggle wireframe display mode.' ");
     // Add 'time' to 'bar': it is a read-only (RO) variable of type TW_TYPE_DOUBLE, with 1 precision digit
-    TwAddVarRO(bar, "time", TW_TYPE_DOUBLE, &time, " label='Time' precision=1 help='Time (in seconds).' ");         
-
+    TwAddVarRO(bar, "time", TW_TYPE_DOUBLE, &time, " label='Time' precision=1 help='Time (in seconds).' ");
     // Add 'bgColor' to 'bar': it is a modifable variable of type TW_TYPE_COLOR3F (3 floats color)
     TwAddVarRW(bar, "bgColor", TW_TYPE_COLOR3F, &bgColor, " label='Background color' ");
-
     // Add 'cubeColor' to 'bar': it is a modifable variable of type TW_TYPE_COLOR32 (32 bits color) with alpha
-    TwAddVarRW(bar, "cubeColor", TW_TYPE_COLOR32, &cubeColor, 
-               " label='Cube color' alpha help='Color and transparency of the cube.' ");
+    TwAddVarRW(bar, "cubeColor", TW_TYPE_COLOR32, &cubeColor, " label='Cube color' alpha help='Color and transparency of the cube.' ");
 
-    // Set GLFW event callbacks
-    // - Redirect window size changes to the callback function WindowSizeCB
-    glfwSetWindowSizeCallback(WindowSizeCB);
-    // - Directly redirect GLFW mouse button events to AntTweakBar
-    glfwSetMouseButtonCallback((GLFWmousebuttonfun)TwEventMouseButtonGLFW);
-    // - Directly redirect GLFW mouse position events to AntTweakBar
-    glfwSetMousePosCallback((GLFWmouseposfun)TwEventMousePosGLFW);
-    // - Directly redirect GLFW mouse wheel events to AntTweakBar
-    glfwSetMouseWheelCallback((GLFWmousewheelfun)TwEventMouseWheelGLFW);
-    // - Directly redirect GLFW key events to AntTweakBar
-    glfwSetKeyCallback((GLFWkeyfun)TwEventKeyGLFW);
-    // - Directly redirect GLFW char events to AntTweakBar
-    glfwSetCharCallback((GLFWcharfun)TwEventCharGLFW);
-
+    // Set GLFW event callbacks:
+    // Redirect window size changes to the callback function WindowSizeCB
+    glfwSetWindowSizeCallback(window, windowSizeCallback);
+    // Directly redirect GLFW mouse button events to AntTweakBar
+    glfwSetMouseButtonCallback(window, twMouseButtonCallbackGLFW);
+    // Directly redirect GLFW mouse position events to AntTweakBar
+    glfwSetCursorPosCallback(window, twCursorPosCallbackGLFW);
+    // Directly redirect GLFW mouse wheel events to AntTweakBar
+    glfwSetScrollCallback(window, twScrollCallbackGLFW);
+    // Directly redirect GLFW key events to AntTweakBar
+    glfwSetKeyCallback(window, twKeyCallbackGLFW);
+    // Directly redirect GLFW char events to AntTweakBar
+    glfwSetCharCallback(window, twCharCallbackGLFW);
+    // Call resize callback to init AntTweakBar
+    glfwSetWindowSize(window, 640, 480);
 
     // Initialize time
     time = glfwGetTime();
 
     // Main loop (repeated while window is not closed and [ESC] is not pressed)
-    while( glfwGetWindowParam(GLFW_OPENED) && !glfwGetKey(GLFW_KEY_ESC) )
+    while( !glfwWindowShouldClose(window) && !glfwGetKey(window, GLFW_KEY_ESCAPE) )
     {
         // Clear frame buffer using bgColor
         glClearColor(bgColor[0], bgColor[1], bgColor[2], 1);
@@ -184,19 +170,21 @@ int main()
     
         // Set color and draw model
         glColor4ubv(cubeColor);
-        DrawModel(wire);
-        
+        DrawModel(isWireframe);
+
         // Draw tweak bars
         TwDraw();
-
         // Present frame buffer
-        glfwSwapBuffers();
+        glfwSwapBuffers(window);
+        glfwPollEvents();
     }
 
     // Terminate AntTweakBar and GLFW
     TwTerminate();
+    glfwDestroyWindow(window);
     glfwTerminate();
 
-    return 0;
+    // Exit
+    exit(EXIT_SUCCESS);
 }
 

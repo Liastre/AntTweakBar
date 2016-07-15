@@ -199,7 +199,7 @@ struct CTwBar
     ERetType                GetAttrib(int _AttribID, std::vector<double>& outDouble, std::ostringstream& outString) const;
     bool                    MouseMotion(int _X, int _Y);
     bool                    MouseButton(ETwMouseButtonID _Button, bool _Pressed, int _X, int _Y);
-    bool                    MouseWheel(int _Pos, int _PrevPos, int _MouseX, int _MouseY);
+    bool                    MouseWheel(int offsetY, int offsetX, int mouseX, int mouseY);
     bool                    KeyPressed(int _Key, int _Modifiers);
     bool                    KeyTest(int _Key, int _Modifiers);
     bool                    IsMinimized() const { return m_IsMinimized; }
@@ -405,6 +405,7 @@ protected:
         std::string         m_Clipboard;
     };
     CEditInPlace            m_EditInPlace;
+    void                    editInPlaceStep(bool stepDirection);
     void                    EditInPlaceDraw();
     bool                    EditInPlaceAcceptVar(const CTwVarAtom* _Var);
     bool                    EditInPlaceIsReadOnly();

@@ -1751,7 +1751,8 @@ static int TwCreateGraph(ETwGraphAPI _GraphAPI)
     case TW_OPENGL_CORE:
         g_TwMgr->m_Graph = new CTwGraphOpenGLCore;
         break;
-    case TW_DIRECT3D9:
+    //TODO: place celect into CMake options
+    /*case TW_DIRECT3D9:
         #ifdef ANT_WINDOWS
             if( g_TwMgr->m_Device!=NULL )
                 g_TwMgr->m_Graph = new CTwGraphDirect3D9;
@@ -1783,7 +1784,7 @@ static int TwCreateGraph(ETwGraphAPI _GraphAPI)
                 return 0;
             }
         #endif // ANT_WINDOWS
-        break;
+        break;*/
     }
 
     if( g_TwMgr->m_Graph==NULL )
@@ -2072,7 +2073,7 @@ int ANT_CALL TwDraw()
 
     assert(g_TwMgr->m_Bars.size()==g_TwMgr->m_Order.size());
 
-    // For multi-thread savety
+    // For multi-thread safety
     if( !TwFreeAsyncDrawing() )
         return 0;
 
@@ -2208,7 +2209,7 @@ int ANT_CALL TwWindowSize(int _Width, int _Height)
         return 0;
     }
 
-    // For multi-thread savety
+    // For multi-thread safety
     if( !TwFreeAsyncDrawing() )
         return 0;
 
@@ -3171,7 +3172,7 @@ int ANT_CALL TwSetTopBar(const TwBar *_Bar)
         return 0;
     }
 
-    TwFreeAsyncDrawing(); // For multi-thread savety
+    TwFreeAsyncDrawing(); // For multi-thread safety
 
     if( _Bar!=g_TwMgr->m_PopupBar && g_TwMgr->m_BarAlwaysOnBottom.length()>0 )
     {
@@ -5527,8 +5528,7 @@ static int TwMouseEvent(ETwMouseAction _EventType, TwMouseButtonID _Button, int 
                 Handled = Bar->MouseButton(_Button, (_EventType==TW_MOUSE_PRESSED), _MouseX, _MouseY);
             else if( _EventType==TW_MOUSE_WHEEL )
             {
-                if( abs(_WheelPos-g_TwMgr->m_LastMouseWheelPos)<4 ) // avoid crazy wheel positions
-                    Handled = Bar->MouseWheel(_WheelPos, g_TwMgr->m_LastMouseWheelPos, _MouseX, _MouseY);
+                Handled = Bar->MouseWheel(_WheelPos, g_TwMgr->m_LastMouseWheelPos, _MouseX, _MouseY);
             }
             if( Handled )
                 break;
@@ -6260,6 +6260,7 @@ void CTwMgr::UpdateHelpBar()
 
 void CTwMgr::CreateCursors()
 {
+    //TODO: create cursor
     if( m_CursorsCreated )
         return;
     m_CursorArrow = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_ARROW));
@@ -6369,6 +6370,7 @@ void CTwMgr::FreeCursors()
 
 void CTwMgr::SetCursor(CTwMgr::CCursor _Cursor)
 {
+    //TODO: set cursor Arrow, IBeam doesn't work
     if( m_CursorsCreated )
     {
         CURSORINFO ci;

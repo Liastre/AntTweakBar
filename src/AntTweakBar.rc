@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Français (France) resources
+// French resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
 #ifdef _WIN32
@@ -66,7 +66,7 @@ IDC_CURSOR11            CURSOR                  "res\\cur00009.cur"
 IDC_CURSOR12            CURSOR                  "res\\cur00010.cur"
 IDC_CURSOR13            CURSOR                  "res\\cur00011.cur"
 IDC_CURSOR14            CURSOR                  "res\\cur00012.cur"
-#endif    // Français (France) resources
+#endif    // French resources
 /////////////////////////////////////////////////////////////////////////////
 
 

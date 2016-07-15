@@ -11,9 +11,7 @@
 //
 //  ---------------------------------------------------------------------------
 
-#include <GLFW/glfw3.h>
 #include <AntTweakBar.h>
-
 
 int TW_CALL TwEventMouseButtonGLFW(int glfwButton, int glfwAction)
 {
@@ -175,7 +173,6 @@ int TW_CALL TwEventKeyGLFW(int glfwKey, int glfwAction)
     return handled;
 }
 
-
 int TW_CALL TwEventCharGLFW(int glfwChar, int glfwAction)
 {
     if( glfwAction==GLFW_PRESS && (glfwChar & 0xff00)==0 )
@@ -185,40 +182,35 @@ int TW_CALL TwEventCharGLFW(int glfwChar, int glfwAction)
 }
 
 // callbacks
-TW_EXPORT_API void twSetMouseButtonCallbackGLFW (GLFWwindow* window, int button, int action, int mods) {
-    TwEventMouseButtonGLFW(button, action);
+TW_EXPORT_API int twMouseButtonCallbackGLFW_d (GLFWwindow* window, int button, int action, int mods) {
+    return(TwEventMouseButtonGLFW(button, action));
 }
-TW_EXPORT_API void twSetCursorPosCallbackGLFW(GLFWwindow* window, double xpos, double ypos) {
-    TwMouseMotion((int)xpos, (int)ypos);
+TW_EXPORT_API int twCursorPosCallbackGLFW_d (GLFWwindow* window, double xpos, double ypos) {
+    return(TwMouseMotion((int)xpos, (int)ypos));
 }
-TW_EXPORT_API void twSetScrollCallbackGLFW(GLFWwindow* window, double xoffset, double yoffset) {
-    TwMouseWheel((int)xoffset);
+TW_EXPORT_API int twScrollCallbackGLFW_d (GLFWwindow* window, double xoffset, double yoffset) {
+    return(TwMouseWheel((int)yoffset));
 }
-TW_EXPORT_API void twSetKeyCallbackGLFW(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    TwEventKeyGLFW(key, action);
+TW_EXPORT_API int twKeyCallbackGLFW_d (GLFWwindow* window, int key, int scancode, int action, int mods) {
+    return(TwEventKeyGLFW(key, action));
 }
-TW_EXPORT_API void twSetCharCallbackGLFW(GLFWwindow* window, unsigned int codepoint) {
-    TwEventCharGLFW(codepoint, GLFW_PRESS);
+TW_EXPORT_API int twCharCallbackGLFW_d (GLFWwindow* window, unsigned int codepoint) {
+    return(TwEventCharGLFW(codepoint, GLFW_PRESS));
 }
 
-// functions with __cdecl calling convension
-TW_EXPORT_API int TW_CDECL_CALL TwEventMouseButtonGLFWcdecl(int glfwButton, int glfwAction)
-{
-    return TwEventMouseButtonGLFW(glfwButton, glfwAction);
+TW_EXPORT_API void twMouseButtonCallbackGLFW (GLFWwindow* window, int button, int action, int mods) {
+    twMouseButtonCallbackGLFW_d (window, button, action, mods);
 }
-TW_EXPORT_API int TW_CDECL_CALL TwEventKeyGLFWcdecl(int glfwKey, int glfwAction)
-{
-    return TwEventKeyGLFW(glfwKey, glfwAction);
+TW_EXPORT_API void twCursorPosCallbackGLFW (GLFWwindow* window, double xpos, double ypos) {
+    twCursorPosCallbackGLFW_d (window, xpos, ypos);
 }
-TW_EXPORT_API int TW_CDECL_CALL TwEventCharGLFWcdecl(int glfwChar, int glfwAction)
-{
-    return TwEventCharGLFW(glfwChar, glfwAction);
+TW_EXPORT_API void twScrollCallbackGLFW (GLFWwindow* window, double xoffset, double yoffset) {
+    twScrollCallbackGLFW_d (window, xoffset, yoffset);
 }
-TW_EXPORT_API int TW_CDECL_CALL TwEventMousePosGLFWcdecl(int mouseX, int mouseY)
-{
-    return TwMouseMotion(mouseX, mouseY);
+TW_EXPORT_API void twKeyCallbackGLFW (GLFWwindow* window, int key, int scancode, int action, int mods) {
+    twKeyCallbackGLFW_d (window, key, scancode, action, mods);
 }
-TW_EXPORT_API int TW_CDECL_CALL TwEventMouseWheelGLFWcdecl(int wheelPos)
-{
-    return TwMouseWheel(wheelPos);
+TW_EXPORT_API void twCharCallbackGLFW (GLFWwindow* window, unsigned int codepoint) {
+    twCharCallbackGLFW_d (window, codepoint);
 }
+

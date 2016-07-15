@@ -24,19 +24,18 @@
 
 #include <AntTweakBar.h>
 
-#define GLFW_DLL // use GLFW as a dynamically linked library
-#include "glfw.h"
-
 #include <cmath>
 #include <iostream>
-#include <cstdlib>
-#include <cstdio>
-#if !defined(_WIN32) && !defined(_WIN64)
-#   define _snprintf snprintf
-#endif
+
 
 const float FLOAT_2PI = 6.283185307f; // 2*PI
 
+namespace Settings
+{
+    int windowWidth = 800;
+    int windowHeight = 600;
+    float windowAspectRatio = (float)windowWidth/windowHeight;
+};
 
 // Light structure: embeds light parameters
 struct Light
@@ -47,10 +46,13 @@ struct Light
     float   Radius;     // radius of the light influence area 
     float   Dist0, Angle0, Height0, Speed0; // light initial cylindrical coordinates and speed
     char    Name[4];    // light short name (will be named "1", "2", "3",...)
-    enum    AnimMode { ANIM_FIXED, ANIM_BOUNCE, ANIM_ROTATE, ANIM_COMBINED };
-    AnimMode Animation; // light animation mode
+    enum    AnimMode {
+        ANIM_FIXED,
+        ANIM_BOUNCE,
+        ANIM_ROTATE,
+        ANIM_COMBINED
+    } Animation; // light animation mode
 };
-
 
 // Class that describes the scene and its methods
 class Scene
@@ -87,7 +89,6 @@ private:
     TwBar * lightsBar;                      // pointer to the tweak bar for lights created by CreateBar()
 };
 
-
 // Constructor
 Scene::Scene()
 {
@@ -114,7 +115,6 @@ Scene::Scene()
     lightsBar = NULL;
 }
 
-
 // Destructor
 Scene::~Scene() 
 { 
@@ -122,7 +122,6 @@ Scene::~Scene()
     if( lights ) 
         delete[] lights;
 }
-
 
 // Create the scene, and (re)initialize lights if changeLights is true
 void Scene::Init(bool changeLights)
@@ -205,14 +204,12 @@ void Scene::Init(bool changeLights)
     glEndList();
 }
 
-
 // Callback function associated to the 'Change lights' button of the lights tweak bar.
 void TW_CALL ReinitCB(void *clientData)
 {
     Scene *scene = static_cast<Scene *>(clientData); // scene pointer is stored in clientData
     scene->Init(true);                               // re-initialize the scene
 }
-
 
 // Create a tweak bar for lights.
 // New enum type and struct type are defined and used by this bar.
@@ -230,11 +227,10 @@ void Scene::CreateBar()
     int zero = 0;
     TwSetParam(lightsBar, "NumLights", "min", TW_PARAM_INT32, 1, &zero);
     TwSetParam(lightsBar, "NumLights", "max", TW_PARAM_INT32, 1, &maxLights);
-    // Note, TwDefine could also have been used for that pupose like this:
+    // Note, TwDefine could also have been used for that purpose like this:
     //   char def[256];
     //   _snprintf(def, 255, "Lights/NumLights min=0 max=%d", maxLights);
     //   TwDefine(def); // min and max are defined using a definition string
-
 
     // Add a button to re-initialize the lights; this button calls the ReinitCB callback function
     TwAddButton(lightsBar, "Reinit", ReinitCB, this, 
@@ -281,7 +277,6 @@ void Scene::CreateBar()
     }
 }
 
-
 // Move lights
 void Scene::Update(double time)
 {
@@ -307,7 +302,6 @@ void Scene::Update(double time)
     }
 }
 
-
 // Activate OpenGL lights; hide unused lights in the Lights tweak bar; 
 // and draw the scene. The scene is reflected by the ground plane, so it is
 // drawn two times: first reflected, and second normal (unreflected).
@@ -319,7 +313,7 @@ void Scene::Draw() const
     glRotated(RotYAngle, 0, 1, 0);
 
     // Hide/active lights
-    int i, lightVisible;
+    unsigned int i, lightVisible;
     for(i=0; i<maxLights; ++i)
     {
         if( i<NumLights )
@@ -348,7 +342,6 @@ void Scene::Draw() const
 
             // Disable the OpenGL light
             glDisable(GL_LIGHT0+i);
-            
         }
 
         // Show or hide the light variable in the Lights tweak bar
@@ -414,11 +407,10 @@ void Scene::Draw() const
     DrawHalos(false);
 }
 
-
 // Subroutine used to draw halos around light positions
 void Scene::DrawHalos(bool reflected) const
 {
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(GL_FALSE);
     float prevAmbient[4];
     glGetFloatv(GL_LIGHT_MODEL_AMBIENT, prevAmbient);
@@ -448,7 +440,6 @@ void Scene::DrawHalos(bool reflected) const
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-
 // Subroutine used to build the ground plane display list (mesh subdivision is adjustable)
 void Scene::DrawSubdivPlaneY(float xMin, float xMax, float y, float zMin, float zMax, int xSubdiv, int zSubdiv) const
 {
@@ -467,7 +458,6 @@ void Scene::DrawSubdivPlaneY(float xMin, float xMax, float y, float zMin, float 
         }
     glEnd();
 }
-
 
 // Subroutine used to build objects display list (mesh subdivision is adjustable)
 void Scene::DrawSubdivCylinderY(float xCenter, float yBottom, float zCenter, float height, float radiusBottom, float radiusTop, int sideSubdiv, int ySubdiv) const
@@ -502,7 +492,6 @@ void Scene::DrawSubdivCylinderY(float xCenter, float yBottom, float zCenter, flo
     glEnd();
 }
 
-
 // Subroutine used to build halo display list
 void Scene::DrawSubdivHaloZ(float x, float y, float z, float radius, int subdiv) const
 {
@@ -518,70 +507,69 @@ void Scene::DrawSubdivHaloZ(float x, float y, float z, float radius, int subdiv)
     glEnd();
 }
 
-
 // Callback function called by GLFW when a mouse button is clicked
-void GLFWCALL OnMouseButton(int glfwButton, int glfwAction)
+void OnMouseButton(GLFWwindow* window, int button, int action, int mods)
 {
-    if( !TwEventMouseButtonGLFW(glfwButton, glfwAction) )   // Send event to AntTweakBar
+    // Send event to AntTweakBar
+    if (!twMouseButtonCallbackGLFW_d(window, button, action, mods))
     {
         // Event has not been handled by AntTweakBar
         // Do something if needed.
     }
 }
-
 
 // Callback function called by GLFW when mouse has moved
-void GLFWCALL OnMousePos(int mouseX, int mouseY)
+void OnMousePos(GLFWwindow* window, double xpos, double ypos)
 {
-    if( !TwEventMousePosGLFW(mouseX, mouseY) )  // Send event to AntTweakBar
+    // Send event to AntTweakBar
+    if (!twCursorPosCallbackGLFW_d(window, xpos, ypos))
     {
         // Event has not been handled by AntTweakBar
         // Do something if needed.
     }
 }
 
-
-// Callback function called by GLFW on mouse wheel event
-void GLFWCALL OnMouseWheel(int pos)
+// Callback function called by GLFW on mouse scroll event
+void OnMouseWheel(GLFWwindow* window, double xoffset, double yoffset)
 {
-    if( !TwEventMouseWheelGLFW(pos) )   // Send event to AntTweakBar
+    // Send event to AntTweakBar
+    if (!twScrollCallbackGLFW_d(window, xoffset, yoffset))
     {
         // Event has not been handled by AntTweakBar
         // Do something if needed.
     }
 }
-
 
 // Callback function called by GLFW on key event
-void GLFWCALL OnKey(int glfwKey, int glfwAction)
+void OnKey(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if( !TwEventKeyGLFW(glfwKey, glfwAction) )  // Send event to AntTweakBar
+    // Send event to AntTweakBar
+    if( !twKeyCallbackGLFW_d(window, key, scancode, action, mods) )
     {
-        if( glfwKey==GLFW_KEY_ESC && glfwAction==GLFW_PRESS ) // Want to quit?
-            glfwCloseWindow();
-        else
-        {
-            // Event has not been handled
-            // Do something if needed.
-        }
-    }
+        // Event has not been handled by AntTweakBar
+        // Do something if needed.
+    };
+
+    // Close application if ESC pressed
+    if( key==GLFW_KEY_ESCAPE && action==GLFW_PRESS )
+        glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
-
 // Callback function called by GLFW on char event
-void GLFWCALL OnChar(int glfwChar, int glfwAction)
+void OnChar(GLFWwindow* window, unsigned int codepoint)
 {
-    if( !TwEventCharGLFW(glfwChar, glfwAction) )    // Send event to AntTweakBar
+    if( !twCharCallbackGLFW_d(window, codepoint) )    // Send event to AntTweakBar
     {
         // Event has not been handled by AntTweakBar
         // Do something if needed.
     }
 }
 
-
 // Callback function called by GLFW when window size changes
-void GLFWCALL OnWindowSize(int width, int height)
+void OnWindowSize(GLFWwindow* window, int width, int height)
 {
+    Settings::windowAspectRatio = (float)width / height;
+
     // Set OpenGL viewport and camera
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
@@ -589,11 +577,10 @@ void GLFWCALL OnWindowSize(int width, int height)
     gluPerspective(40, (double)width/height, 1, 10);
     gluLookAt(-0.3,1,3.5, -0.3,0,0, 0,1,0);
     glTranslated(0, -0.3, 0);
-    
+
     // Send the new window size to AntTweakBar
     TwWindowSize(width, height);
 }
-
 
 // Callback function called when the 'Subdiv' variable value of the main tweak bar has changed.
 void TW_CALL SetSubdivCB(const void *value, void *clientData)
@@ -603,14 +590,12 @@ void TW_CALL SetSubdivCB(const void *value, void *clientData)
     scene->Init(false);                                 // re-init scene with the new Subdiv parameter
 }
 
-
 // Callback function called by the main tweak bar to get the 'Subdiv' value
 void TW_CALL GetSubdivCB(void *value, void *clientData)
 {
     Scene *scene = static_cast<Scene *>(clientData);    // scene pointer is stored in clientData
     *static_cast<int *>(value) = scene->Subdiv;         // copy scene->Subdiv to value
 }
-
 
 // Main function
 int main() 
@@ -619,35 +604,44 @@ int main()
     if( !glfwInit() )
     {
         // A fatal error occurred
-        std::cerr << "GLFW initialization failed" << std::endl;
-        return 1;
+        std::cerr << "GLFW initialization failed!" << std::endl;
+        exit(EXIT_FAILURE);
     }
-
-    // Create a window
-    GLFWvidmode mode;
-    glfwGetDesktopMode(&mode);
-    if( !glfwOpenWindow(800, 600, mode.RedBits, mode.GreenBits, mode.BlueBits, 0, 16, 0, GLFW_WINDOW /* or GLFW_FULLSCREEN */) )
-    {
-        // A fatal error occurred   
-        std::cerr << "Cannot open GLFW window" << std::endl;
-        glfwTerminate();
-        return 1;
-    }
-    glfwSwapInterval(0);
-    glfwEnable(GLFW_MOUSE_CURSOR);
-    glfwEnable(GLFW_KEY_REPEAT);
-    const char title[] = "AntTweakBar example: TwAdvanced1";
-    glfwSetWindowTitle(title);
-    // Set GLFW event callbacks
-    glfwSetWindowSizeCallback(OnWindowSize);
-    glfwSetMouseButtonCallback(OnMouseButton);
-    glfwSetMousePosCallback(OnMousePos);
-    glfwSetMouseWheelCallback(OnMouseWheel);
-    glfwSetKeyCallback(OnKey);
-    glfwSetCharCallback(OnChar);
 
     // Initialize AntTweakBar
-    TwInit(TW_OPENGL, NULL);
+    if( !TwInit(TW_OPENGL, NULL) )
+    {
+        // A fatal error occurred
+        std::cerr << "AntTweakBar initialization failed!" << std::endl;
+        exit(EXIT_FAILURE);
+    };
+
+    // Create a window
+    GLFWwindow* window;
+
+    char* title = (char*)"AntTweakBar example: TwAdvanced1";
+    window = glfwCreateWindow(64, 48, title, NULL, NULL);
+    if(!window)
+    {
+        std::cerr <<  "Can't open GLFW window!" << std::endl;
+        glfwTerminate();
+        exit(EXIT_FAILURE);
+    }
+
+    glfwMakeContextCurrent(window);
+
+    glfwSwapInterval(0);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+    // Set GLFW event callbacks
+    glfwSetWindowSizeCallback(window, OnWindowSize);
+    glfwSetMouseButtonCallback(window, OnMouseButton);
+    glfwSetCursorPosCallback(window, OnMousePos);
+    glfwSetScrollCallback(window, OnMouseWheel);
+    glfwSetKeyCallback(window, OnKey);
+    glfwSetCharCallback(window, OnChar);
+    glfwSetWindowSize(window, Settings::windowWidth, Settings::windowHeight);
+
     // Change the font size, and add a global message to the Help bar.
     TwDefine(" GLOBAL fontSize=3 help='This example illustrates the definition of custom structure type as well as many other features.' ");
 
@@ -691,7 +685,7 @@ int main()
     double frameDTime = 0, frameCount = 0, fps = 0; // Framerate
 
     // Main loop (repeated while window is not closed)
-    while( glfwGetWindowParam(GLFW_OPENED) )
+    while( !glfwWindowShouldClose(window) )
     {
         // Get elapsed time
         dt = glfwGetTime() - time;
@@ -710,12 +704,6 @@ int main()
         // Draw scene
         scene.Draw();
 
-        // Draw tweak bars
-        TwDraw();
-
-        // Present frame buffer
-        glfwSwapBuffers();
-
         // Estimate framerate
         frameCount++;
         frameDTime += dt;
@@ -724,14 +712,22 @@ int main()
             fps = frameCount/frameDTime;
             char newTitle[128];
             _snprintf(newTitle, sizeof(newTitle), "%s (%.1f fps)", title, fps);
-            //glfwSetWindowTitle(newTitle); // uncomment to display framerate
+            glfwSetWindowTitle(window, newTitle); // uncomment to display framerate
             frameCount = frameDTime = 0;
         }
+
+        // Draw tweak bars
+        TwDraw();
+        // Present frame buffer
+        glfwSwapBuffers(window);
+        glfwPollEvents();
     }
 
     // Terminate AntTweakBar and GLFW
     TwTerminate();
+    glfwDestroyWindow(window);
     glfwTerminate();
 
-    return 0;
+    // Exit
+    exit(EXIT_SUCCESS);
 }
