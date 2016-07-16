@@ -302,37 +302,35 @@ TW_API void     TW_CALL TwHandleErrors(TwErrorHandler errorHandler);
 // For libSDL event loop
 TW_API int      TW_CALL TwEventSDL(const void *sdlEvent, unsigned char sdlMajorVersion, unsigned char sdlMinorVersion);
 
-// GLFW event callbacks
+// GLFW events callbacks
 #ifdef ANTTWEAKBAR_USE_GLFW3
-    // standard callbacks
-    TW_IMPORT_API void twCursorPosCallbackGLFW(GLFWwindow* window, double xpos, double ypos);
-    TW_IMPORT_API void twMouseButtonCallbackGLFW (GLFWwindow* window, int button, int action, int mods);
-    TW_IMPORT_API void twScrollCallbackGLFW(GLFWwindow* window, double xoffset, double yoffset);
-    TW_IMPORT_API void twKeyCallbackGLFW(GLFWwindow* window, int key, int scancode, int action, int mods);
-    TW_IMPORT_API void twCharCallbackGLFW(GLFWwindow* window, unsigned int codepoint);
-    // debug callbacks, that returns error code
-    TW_IMPORT_API int twCursorPosCallbackGLFW_d(GLFWwindow* window, double xpos, double ypos);
+    // Callbacks that returning error code:
+    TW_IMPORT_API int twCursorPosCallbackGLFW_d(GLFWwindow* window, double posX, double posY);
     TW_IMPORT_API int twMouseButtonCallbackGLFW_d(GLFWwindow* window, int button, int action, int mods);
-    TW_IMPORT_API int twScrollCallbackGLFW_d(GLFWwindow* window, double xoffset, double yoffset);
+    TW_IMPORT_API int twScrollCallbackGLFW_d(GLFWwindow* window, double offsetX, double offsetY);
     TW_IMPORT_API int twKeyCallbackGLFW_d(GLFWwindow* window, int key, int scancode, int action, int mods);
     TW_IMPORT_API int twCharCallbackGLFW_d(GLFWwindow* window, unsigned int codepoint);
+    // Callbacks without returning error code:
+    TW_IMPORT_API void twCursorPosCallbackGLFW(GLFWwindow* window, double posX, double posY);
+    TW_IMPORT_API void twMouseButtonCallbackGLFW (GLFWwindow* window, int button, int action, int mods);
+    TW_IMPORT_API void twScrollCallbackGLFW(GLFWwindow* window, double offsetX, double offsetY);
+    TW_IMPORT_API void twKeyCallbackGLFW(GLFWwindow* window, int key, int scancode, int action, int mods);
+    TW_IMPORT_API void twCharCallbackGLFW(GLFWwindow* window, unsigned int codepoint);
 #endif
 
 // GLUT event callbacks (Windows calling convention for GLUT callbacks is cdecl)
 #ifdef ANTTWEAKBAR_USE_GLUT
-    typedef void *GLUTmousebuttonfun (int glutButton, int glutState, int mouseX, int mouseY);
-    typedef void *GLUTmousemotionfun (int mouseX, int mouseY);
-    typedef void *GLUTkeyboardfun (unsigned char glutKey, int mouseX, int mouseY);
-    typedef void *GLUTspecialfun (int glutKey, int mouseX, int mouseY);
-    TW_IMPORT_API void twSetMouseButtonCallbackGLUT (int button, int state, int xpos, int ypos);
-    TW_IMPORT_API void twSetCursorPosCallbackGLUT (int xpos, int ypos);
-    #define twCursorPosCallbackGLUT      twSetCursorPosCallbackGLUT
-    #define twMouseButtonCallbackGLUT    twSetMouseButtonCallbackGLUT
-    /*TW_IMPORT_API int TW_GLUT_CALL TwEventMouseButtonGLUT(int glutButton, int glutState, int mouseX, int mouseY);
-    TW_IMPORT_API int TW_GLUT_CALL TwEventMouseMotionGLUT(int mouseX, int mouseY);
-    TW_IMPORT_API int TW_GLUT_CALL TwEventKeyboardGLUT(unsigned char glutKey, int mouseX, int mouseY);
-    TW_IMPORT_API int TW_GLUT_CALL TwEventSpecialGLUT(int glutKey, int mouseX, int mouseY);
-    TW_IMPORT_API int TW_CALL      TwGLUTModifiersFunc(int (TW_CALL *glutGetModifiersFunc)(void));*/
+    TW_IMPORT_API int  twSetModifiersFuncPointerGLUT(int (TW_CALL *glutModifiersFuncPointer)(void));
+    // Callbacks that returning error code:
+    TW_IMPORT_API int twCursorPosCallbackGLUT_d (int posX, int posY);
+    TW_IMPORT_API int twMouseButtonCallbackGLUT_d (int button, int state, int posX, int posY);
+    TW_IMPORT_API int twKeyCallbackGLUT_d (unsigned char key, int mouseX, int mouseY);
+    TW_IMPORT_API int twSpecialKeyCallbackGLUT_d (int key, int mouseX, int mouseY);
+    // Callbacks without returning error code:
+    TW_IMPORT_API void twCursorPosCallbackGLUT (int posX, int posY);
+    TW_IMPORT_API void twMouseButtonCallbackGLUT (int button, int state, int posX, int posY);
+    TW_IMPORT_API void twKeyCallbackGLUT (unsigned char key, int mouseX, int mouseY);
+    TW_IMPORT_API void twSpecialKeyCallbackGLUT (int key, int mouseX, int mouseY);
 #endif
 
 // SFML event loop

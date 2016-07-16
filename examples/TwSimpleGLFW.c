@@ -132,7 +132,7 @@ int main()
     // Add 'cubeColor' to 'bar': it is a modifable variable of type TW_TYPE_COLOR32 (32 bits color) with alpha
     TwAddVarRW(bar, "cubeColor", TW_TYPE_COLOR32, &cubeColor, " label='Cube color' alpha help='Color and transparency of the cube.' ");
 
-    // Set GLFW event callbacks:
+    // Set event callbacks:
     // Redirect window size changes to the callback function WindowSizeCB
     glfwSetWindowSizeCallback(window, windowSizeCallback);
     // Directly redirect GLFW mouse button events to AntTweakBar
@@ -179,7 +179,7 @@ int main()
         glfwPollEvents();
     }
 
-    // Terminate AntTweakBar and GLFW
+    // onTerminate AntTweakBar and GLFW
     TwTerminate();
     glfwDestroyWindow(window);
     glfwTerminate();

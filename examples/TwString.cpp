@@ -15,26 +15,10 @@
 
 #include <AntTweakBar.h>
 
-#if defined(_WIN32) || defined(_WIN64)
-//  MiniGLUT.h is provided to avoid the need of having GLUT installed to 
-//  recompile this example. Do not use it in your own programs, better
-//  install and use the actual GLUT library SDK.
-#   define USE_MINI_GLUT
-#endif
-
-#if defined(USE_MINI_GLUT)
-#   include "../src/MiniGLUT.h"
-#elif defined(_MACOSX)
-#   include <GLUT/glut.h>
-#else
-#   include <GL/glut.h>
-#endif
-
 #include <sstream>
 #include <vector>
 #include <cstring>
-#include <cstdlib>
-#include <cstdio>
+
 #if !defined _MSC_VER
 #   define _snprintf snprintf
 #endif
@@ -239,38 +223,42 @@ void OnReshape(int width, int height)
 }
 
 // Function called at exit
-void OnTerminate(void)
+void onTerminate(void)
 { 
     // terminate AntTweakBar
     TwTerminate();
 }
 
 // Event callbacks
-void OnMouseButton(int glutButton, int glutState, int mouseX, int mouseY)
+void onMouseButton(int button, int state, int mouseX, int mouseY)
 {
     // send event to AntTweakBar
-    if (TwEventMouseButtonGLUT(glutButton, glutState, mouseX, mouseY))
+    if (twMouseButtonCallbackGLUT_d(button, state, mouseX, mouseY))
         glutPostRedisplay(); // request redraw if event has been handled
 }
 
-void OnMouseMotion(int mouseX, int mouseY)
+void onMouseMotion(int mouseX, int mouseY)
 {
     // send event to AntTweakBar
-    if (TwEventMouseMotionGLUT(mouseX, mouseY))
+    if (twCursorPosCallbackGLUT_d(mouseX, mouseY))
         glutPostRedisplay(); // request redraw if event has been handled
 }
 
-void OnKeyboard(unsigned char glutKey, int mouseX, int mouseY)
+void onKeyboardKey(unsigned char key, int mouseX, int mouseY)
 {
+    // exit on ESC
+    if (key==27) {
+        exit(0);
+    }
     // send event to AntTweakBar
-    if (TwEventKeyboardGLUT(glutKey, mouseX, mouseY))
+    if (twKeyCallbackGLUT_d(key, mouseX, mouseY))
         glutPostRedisplay(); // request redraw if event has been handled
 }
 
-void OnSpecial(int glutKey, int mouseX, int mouseY)
+void onKeyboardSpecialKey(int key, int mouseX, int mouseY)
 {
     // send event to AntTweakBar
-    if (TwEventSpecialGLUT(glutKey, mouseX, mouseY))
+    if (twSpecialKeyCallbackGLUT_d(key, mouseX, mouseY))
         glutPostRedisplay(); // request redraw if event has been handled
 }
 
@@ -291,31 +279,28 @@ int main(int argc, char *argv[])
     // Set GLUT callbacks
     glutDisplayFunc(OnDisplay);
     glutReshapeFunc(OnReshape);
-    atexit(OnTerminate);  // Called after glutMainLoop ends
+    atexit(onTerminate);  // Called after glutMainLoop ends
 
     // Initialize AntTweakBar
     TwInit(TW_OPENGL, NULL);
 
-    // Set GLUT event callbacks
-    // - Directly redirect GLUT mouse button events to AntTweakBar
-    glutMouseFunc(OnMouseButton);
-    // - Directly redirect GLUT mouse motion events to AntTweakBar
-    glutMotionFunc(OnMouseMotion);
-    // - Directly redirect GLUT mouse "passive" motion events to AntTweakBar (same as MouseMotion)
-    glutPassiveMotionFunc(OnMouseMotion);
-    // - Directly redirect GLUT key events to AntTweakBar
-    glutKeyboardFunc(OnKeyboard);
-    // - Directly redirect GLUT special key events to AntTweakBar
-    glutSpecialFunc(OnSpecial);
-    // - Send 'glutGetModifers' function pointer to AntTweakBar;
-    //   required because the GLUT key event functions do not report key modifiers states.
-    TwGLUTModifiersFunc(glutGetModifiers);
-
+    // Set events callbacks:
+    // mouse position events
+    glutMotionFunc(onMouseMotion);
+    // mouse "passive" (while no mouse buttons are pressed) motion events
+    glutPassiveMotionFunc(onMouseMotion);
+    // mouse buttons events
+    glutMouseFunc(onMouseButton);
+    // keyboard keys events
+    glutKeyboardFunc(onKeyboardKey);
+    // special keyboard keys events
+    glutSpecialFunc(onKeyboardSpecialKey);
+    // required! read description in TwEventGLUT.cpp
+    twSetModifiersFuncPointerGLUT(glutGetModifiers);
 
     // Create a tweak bar
     TwBar *bar = TwNewBar("Main");
     TwDefine(" Main label='~ String variable examples ~' fontSize=3 position='180 16' size='270 440' valuesWidth=100 ");
-
 
     //
     // 1) C++ std::string variable example
@@ -400,7 +385,6 @@ int main(int argc, char *argv[])
     // Set the group label & separator
     TwDefine(" Main/CSString label='Character capitalization' help='This example demonstates different use of C-Static sized variables.' ");
     TwAddSeparator(bar, "Sep3", "");
-
 
     // Call the GLUT main loop
     glutMainLoop();

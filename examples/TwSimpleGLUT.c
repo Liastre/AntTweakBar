@@ -12,27 +12,10 @@
 //
 //  ---------------------------------------------------------------------------
 
-
 #include <AntTweakBar.h>
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
 
-#if defined(_WIN32) || defined(_WIN64)
-//  MiniGLUT.h is provided to avoid the need of having GLUT installed to 
-//  recompile this example. Do not use it in your own programs, better
-//  install and use the actual GLUT library SDK.
-#   define USE_MINI_GLUT
-#endif
-
-#if defined(USE_MINI_GLUT)
-#   include "../src/MiniGLUT.h"
-#elif defined(_MACOSX)
-#   include <GLUT/glut.h>
-#else
-#   include <GL/glut.h>
-#endif
 
 // This example displays one of the following shapes
 typedef enum { SHAPE_TEAPOT=1, SHAPE_TORUS, SHAPE_CONE } Shape;
@@ -198,10 +181,9 @@ void Reshape(int width, int height)
 
 
 // Function called at exit
-void Terminate(void)
+void onTerminate(void)
 { 
     glDeleteLists(SHAPE_TEAPOT, NUM_SHAPES);
-
     TwTerminate();
 }
 
@@ -255,25 +237,24 @@ int main(int argc, char *argv[])
     // Set GLUT callbacks
     glutDisplayFunc(Display);
     glutReshapeFunc(Reshape);
-    atexit(Terminate);  // Called after glutMainLoop ends
+    atexit(onTerminate);  // Called after glutMainLoop ends
 
     // Initialize AntTweakBar
     TwInit(TW_OPENGL, NULL);
 
-    // Set GLUT event callbacks
-    // - Directly redirect GLUT mouse button events to AntTweakBar
-    glutMouseFunc((GLUTmousebuttonfun)TwEventMouseButtonGLUT);
-    // - Directly redirect GLUT mouse motion events to AntTweakBar
-    glutMotionFunc((GLUTmousemotionfun)TwEventMouseMotionGLUT);
-    // - Directly redirect GLUT mouse "passive" motion events to AntTweakBar (same as MouseMotion)
-    glutPassiveMotionFunc((GLUTmousemotionfun)TwEventMouseMotionGLUT);
-    // - Directly redirect GLUT key events to AntTweakBar
-    glutKeyboardFunc((GLUTkeyboardfun)TwEventKeyboardGLUT);
-    // - Directly redirect GLUT special key events to AntTweakBar
-    glutSpecialFunc((GLUTspecialfun)TwEventSpecialGLUT);
-    // - Send 'glutGetModifers' function pointer to AntTweakBar;
-    //   required because the GLUT key event functions do not report key modifiers states.
-    TwGLUTModifiersFunc(glutGetModifiers);
+    // Set events callbacks:
+    // mouse position events
+    glutMotionFunc(twCursorPosCallbackGLUT);
+    // mouse "passive" (while no mouse buttons are pressed) motion events
+    glutPassiveMotionFunc(twCursorPosCallbackGLUT);
+    // mouse buttons events
+    glutMouseFunc(twMouseButtonCallbackGLUT);
+    // keyboard keys events
+    glutKeyboardFunc(twKeyCallbackGLUT);
+    // special keyboard keys events
+    glutSpecialFunc(twSpecialKeyCallbackGLUT);
+    // required! read description in TwEventGLUT.cpp
+    twSetModifiersFuncPointerGLUT(glutGetModifiers);
 
     // Create some 3D objects (stored in display lists)
     glNewList(SHAPE_TEAPOT, GL_COMPILE);

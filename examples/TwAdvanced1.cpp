@@ -508,7 +508,7 @@ void Scene::DrawSubdivHaloZ(float x, float y, float z, float radius, int subdiv)
 }
 
 // Callback function called by GLFW when a mouse button is clicked
-void OnMouseButton(GLFWwindow* window, int button, int action, int mods)
+void onMouseButton(GLFWwindow* window, int button, int action, int mods)
 {
     // Send event to AntTweakBar
     if (!twMouseButtonCallbackGLFW_d(window, button, action, mods))
@@ -519,7 +519,7 @@ void OnMouseButton(GLFWwindow* window, int button, int action, int mods)
 }
 
 // Callback function called by GLFW when mouse has moved
-void OnMousePos(GLFWwindow* window, double xpos, double ypos)
+void onMouseMotion(GLFWwindow* window, double xpos, double ypos)
 {
     // Send event to AntTweakBar
     if (!twCursorPosCallbackGLFW_d(window, xpos, ypos))
@@ -530,7 +530,7 @@ void OnMousePos(GLFWwindow* window, double xpos, double ypos)
 }
 
 // Callback function called by GLFW on mouse scroll event
-void OnMouseWheel(GLFWwindow* window, double xoffset, double yoffset)
+void onMouseWheel(GLFWwindow* window, double xoffset, double yoffset)
 {
     // Send event to AntTweakBar
     if (!twScrollCallbackGLFW_d(window, xoffset, yoffset))
@@ -541,7 +541,7 @@ void OnMouseWheel(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 // Callback function called by GLFW on key event
-void OnKey(GLFWwindow* window, int key, int scancode, int action, int mods)
+void onKeyboardKey(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     // Send event to AntTweakBar
     if( !twKeyCallbackGLFW_d(window, key, scancode, action, mods) )
@@ -556,7 +556,7 @@ void OnKey(GLFWwindow* window, int key, int scancode, int action, int mods)
 }
 
 // Callback function called by GLFW on char event
-void OnChar(GLFWwindow* window, unsigned int codepoint)
+void onChar(GLFWwindow* window, unsigned int codepoint)
 {
     if( !twCharCallbackGLFW_d(window, codepoint) )    // Send event to AntTweakBar
     {
@@ -566,7 +566,7 @@ void OnChar(GLFWwindow* window, unsigned int codepoint)
 }
 
 // Callback function called by GLFW when window size changes
-void OnWindowSize(GLFWwindow* window, int width, int height)
+void onWindowSize(GLFWwindow* window, int width, int height)
 {
     Settings::windowAspectRatio = (float)width / height;
 
@@ -634,12 +634,12 @@ int main()
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     // Set GLFW event callbacks
-    glfwSetWindowSizeCallback(window, OnWindowSize);
-    glfwSetMouseButtonCallback(window, OnMouseButton);
-    glfwSetCursorPosCallback(window, OnMousePos);
-    glfwSetScrollCallback(window, OnMouseWheel);
-    glfwSetKeyCallback(window, OnKey);
-    glfwSetCharCallback(window, OnChar);
+    glfwSetWindowSizeCallback(window, onWindowSize);
+    glfwSetMouseButtonCallback(window, onMouseButton);
+    glfwSetCursorPosCallback(window, onMouseMotion);
+    glfwSetScrollCallback(window, onMouseWheel);
+    glfwSetKeyCallback(window, onKeyboardKey);
+    glfwSetCharCallback(window, onChar);
     glfwSetWindowSize(window, Settings::windowWidth, Settings::windowHeight);
 
     // Change the font size, and add a global message to the Help bar.
@@ -723,7 +723,7 @@ int main()
         glfwPollEvents();
     }
 
-    // Terminate AntTweakBar and GLFW
+    // onTerminate AntTweakBar and GLFW
     TwTerminate();
     glfwDestroyWindow(window);
     glfwTerminate();

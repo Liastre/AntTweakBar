@@ -12,27 +12,9 @@
 //  
 //  ---------------------------------------------------------------------------
 
-
 #include <AntTweakBar.h>
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
-
-#if defined(_WIN32) || defined(_WIN64)
-//  MiniGLUT.h is provided to avoid the need of having GLUT installed to 
-//  recompile this example. Do not use it in your own programs, better
-//  install and use the actual GLUT library SDK.
-#   define USE_MINI_GLUT
-#endif
-
-#if defined(USE_MINI_GLUT)
-#   include "../src/MiniGLUT.h"
-#elif defined(_MACOSX)
-#   include <GLUT/glut.h>
-#else
-#   include <GL/glut.h>
-#endif
 
 
 // This example displays one of the following shapes in each sub-window
@@ -41,18 +23,18 @@ typedef enum { SHAPE_TEAPOT=1, SHAPE_TORUS, SHAPE_CONE } Shape;
 
 typedef struct
 {
-	int   WinID;
-	TwBar *Bar;
-	Shape ObjectShape;
-	float Zoom;
-	float Rotation[4];
-	int   AutoRotate;
-	int   RotateTime;
-	float RotateStart[4];
-	float MatAmbient[4];
-	float MatDiffuse[4];
-	float LightMultiplier;
-	float LightDirection[3];
+    int   WinID;
+    TwBar *Bar;
+    Shape ObjectShape;
+    float Zoom;
+    float Rotation[4];
+    int   AutoRotate;
+    int   RotateTime;
+    float RotateStart[4];
+    float MatAmbient[4];
+    float MatDiffuse[4];
+    float LightMultiplier;
+    float LightDirection[3];
 } SubWindowData;
 
 SubWindowData g_SubWindowData[2];
@@ -107,10 +89,10 @@ void ConvertQuaternionToMatrix(const float *quat, float *mat)
 void MultiplyQuaternions(const float *q1, const float *q2, float *qout)
 {
     float qr[4];
-	qr[0] = q1[3]*q2[0] + q1[0]*q2[3] + q1[1]*q2[2] - q1[2]*q2[1];
-	qr[1] = q1[3]*q2[1] + q1[1]*q2[3] + q1[2]*q2[0] - q1[0]*q2[2];
-	qr[2] = q1[3]*q2[2] + q1[2]*q2[3] + q1[0]*q2[1] - q1[1]*q2[0];
-	qr[3]  = q1[3]*q2[3] - (q1[0]*q2[0] + q1[1]*q2[1] + q1[2]*q2[2]);
+    qr[0] = q1[3]*q2[0] + q1[0]*q2[3] + q1[1]*q2[2] - q1[2]*q2[1];
+    qr[1] = q1[3]*q2[1] + q1[1]*q2[3] + q1[2]*q2[0] - q1[0]*q2[2];
+    qr[2] = q1[3]*q2[2] + q1[2]*q2[3] + q1[0]*q2[1] - q1[1]*q2[0];
+    qr[3]  = q1[3]*q2[3] - (q1[0]*q2[0] + q1[1]*q2[1] + q1[2]*q2[2]);
     qout[0] = qr[0]; qout[1] = qr[1]; qout[2] = qr[2]; qout[3] = qr[3];
 }
 
@@ -156,13 +138,13 @@ void ReshapeMainWindow(int width, int height)
 {
     if (width > 32 && height > 32) 
     {
-	    glutSetWindow(g_SubWindowData[0].WinID);
-	    glutPositionWindow(8, 8);
-	    glutReshapeWindow(width/2-16, height-16);
+        glutSetWindow(g_SubWindowData[0].WinID);
+        glutPositionWindow(8, 8);
+        glutReshapeWindow(width/2-16, height-16);
 
-	    glutSetWindow(g_SubWindowData[1].WinID);
-	    glutPositionWindow(width/2+8, 8);
-	    glutReshapeWindow(width/2-16, height-16);
+        glutSetWindow(g_SubWindowData[1].WinID);
+        glutPositionWindow(width/2+8, 8);
+        glutReshapeWindow(width/2-16, height-16);
     }
 }
 
@@ -233,8 +215,8 @@ void DisplaySubWindow(void)
 // Callback function called by GLUT when sub-window size has changed
 void ReshapeSubWindow(int width, int height)
 {
-	SubWindowData *win;
-	
+    SubWindowData *win;
+
     win = GetCurrentSubWindowData();
     if (win == NULL) return;
 
@@ -255,23 +237,23 @@ void ReshapeSubWindow(int width, int height)
 
 
 // Function called at exit
-void Terminate(void)
-{ 
+void onTerminate(void)
+{
     int i;
-	for (i=0; i<2; i++) {
-		glutSetWindow(g_SubWindowData[i].WinID);	
-    	glDeleteLists(SHAPE_TEAPOT, NUM_SHAPES);
-	}
+    for (i=0; i<2; i++) {
+        glutSetWindow(g_SubWindowData[i].WinID);
+        glDeleteLists(SHAPE_TEAPOT, NUM_SHAPES);
+    }
     TwTerminate();
 }
 
 
-//  Callback function called when the 'AutoRotate' variable value of the tweak bar has changed
+// Callback function called when the 'AutoRotate' variable value of the tweak bar has changed
 void TW_CALL SetAutoRotateCB(const void *value, void *clientData)
 {
-	SubWindowData *win;
-	
-	win = (SubWindowData *)clientData;
+    SubWindowData *win;
+
+    win = (SubWindowData *)clientData;
     win->AutoRotate = *(const int *)value; // copy value to win->AutoRotate
 
     if (win->AutoRotate != 0) 
@@ -289,48 +271,46 @@ void TW_CALL SetAutoRotateCB(const void *value, void *clientData)
     TwSetParam(win->Bar, "ObjRotation", "readonly", TW_PARAM_INT32, 1, &win->AutoRotate);
 }
 
-
 //  Callback function called by the tweak bar to get the 'AutoRotate' value
 void TW_CALL GetAutoRotateCB(void *value, void *clientData)
 {
-	SubWindowData *win;
-	
-	win = (SubWindowData *)clientData;
+    SubWindowData *win;
+
+    win = (SubWindowData *)clientData;
     *(int *)value = win->AutoRotate; // copy win->AutoRotate to value
 }
 
-
 // Mouse Button event callbacks
-int MouseButtonCB(int glutButton, int glutState, int mouseX, int mouseY) 
+void onMouseButton(int glutButton, int glutState, int mouseX, int mouseY)
 {
-	TwSetCurrentWindow(glutGetWindow());
-	return TwEventMouseButtonGLUT(glutButton,glutState,mouseX,mouseY);
+    TwSetCurrentWindow(glutGetWindow());
+    twMouseButtonCallbackGLUT(glutButton,glutState,mouseX,mouseY);
 }
-
 
 // Mouse Motion event callbacks
-int MouseMotionCB(int mouseX, int mouseY) 
+void onMouseMotion(int mouseX, int mouseY)
 {
-	TwSetCurrentWindow(glutGetWindow());
-	return TwEventMouseMotionGLUT(mouseX,mouseY);
+    TwSetCurrentWindow(glutGetWindow());
+    twCursorPosCallbackGLUT(mouseX,mouseY);
 }
-
 
 // Keyboard event callbacks
-int KeyboardCB(unsigned char glutKey, int mouseX, int mouseY) 
+void onKeyboardKey(unsigned char key, int mouseX, int mouseY)
 {
-	TwSetCurrentWindow(glutGetWindow());
-	return TwEventKeyboardGLUT(glutKey,mouseX,mouseY);	
+    // exit on ESC
+    if (key==27) {
+        exit(0);
+    }
+    TwSetCurrentWindow(glutGetWindow());
+    twKeyCallbackGLUT(key,mouseX,mouseY);
 }
-
 
 // Special key event callbacks
-int SpecialKeyCB(int glutKey, int mouseX, int mouseY) 
+void onKeyboardSpecialKey(int key, int mouseX, int mouseY)
 {
-	TwSetCurrentWindow(glutGetWindow());
-	return TwEventSpecialGLUT(glutKey,mouseX,mouseY);	
+    TwSetCurrentWindow(glutGetWindow());
+    twSpecialKeyCallbackGLUT(key,mouseX,mouseY);
 }
-
 
 // Setup new sub-window
 void SetupSubWindow(int subWinIdx) 
@@ -341,34 +321,34 @@ void SetupSubWindow(int subWinIdx)
     
     win = &g_SubWindowData[subWinIdx];
     win->ObjectShape = (subWinIdx == 0) ? SHAPE_TEAPOT : SHAPE_TORUS;
-	win->Zoom = 1;
-	win->AutoRotate = (subWinIdx == 0);
+    win->Zoom = 1;
+    win->AutoRotate = (subWinIdx == 0);
     win->MatAmbient[0] = (subWinIdx == 1) ? 0.0f : 0.5f;; win->MatAmbient[1] = win->MatAmbient[2] = 0.2f; win->MatAmbient[3] = 1;
     win->MatDiffuse[0] = (subWinIdx == 1) ? 0.0f : 1.0f; win->MatDiffuse[1] = 1; win->MatDiffuse[2] = 0; win->MatDiffuse[3] = 1;
-	win->LightMultiplier = 1;
+    win->LightMultiplier = 1;
     win->LightDirection[0] = win->LightDirection[1] = win->LightDirection[2] = -0.57735f;
     win->RotateTime = GetTimeMs();
     SetQuaternionFromAxisAngle(axis, angle, win->Rotation);
     SetQuaternionFromAxisAngle(axis, angle, win->RotateStart);
-	
-	glutSetWindow(win->WinID);
+
+    glutSetWindow(win->WinID);
     // Set GLUT callbacks
     glutDisplayFunc(DisplaySubWindow);
     glutReshapeFunc(ReshapeSubWindow);
-    // Set GLUT event callbacks
-    // - Register mouse button events callback
-    glutMouseFunc((GLUTmousebuttonfun)MouseButtonCB);
-    // - Register mouse motion events callback
-    glutMotionFunc((GLUTmousemotionfun)MouseMotionCB);
-    // - Register mouse "passive" motion events (same as Motion)
-    glutPassiveMotionFunc((GLUTmousemotionfun)MouseMotionCB);
-    // - Register keyboard events callback
-    glutKeyboardFunc((GLUTkeyboardfun)KeyboardCB);
-    // - Register special key events callback
-    glutSpecialFunc((GLUTspecialfun)SpecialKeyCB);
-    // - Send 'glutGetModifers' function pointer to AntTweakBar;
-    //   required because the GLUT key event functions do not report key modifiers states.
-    TwGLUTModifiersFunc(glutGetModifiers);
+
+    // Set events callbacks:
+    // mouse position events
+    glutMotionFunc(onMouseMotion);
+    // mouse "passive" (while no mouse buttons are pressed) motion events
+    glutPassiveMotionFunc(onMouseMotion);
+    // mouse buttons events
+    glutMouseFunc(onMouseButton);
+    // keyboard keys events
+    glutKeyboardFunc(onKeyboardKey);
+    // special keyboard keys events
+    glutSpecialFunc(onKeyboardSpecialKey);
+    // required! read description in TwEventGLUT.cpp
+    twSetModifiersFuncPointerGLUT(glutGetModifiers);
 
     // Create some 3D objects (stored in display lists)
     glNewList(SHAPE_TEAPOT, GL_COMPILE);
@@ -434,7 +414,7 @@ void SetupSubWindow(int subWinIdx)
 
 // Main
 int main(int argc, char *argv[])
-{	
+{
     int mainWinID;
 
     // Initialize GLUT
@@ -443,19 +423,19 @@ int main(int argc, char *argv[])
     glutInitWindowSize(960, 480);
     mainWinID = glutCreateWindow("AntTweakBar multi-window example");
     glutCreateMenu(NULL);
-	glutDisplayFunc(DisplayMainWindow);
-	glutReshapeFunc(ReshapeMainWindow);
+    glutDisplayFunc(DisplayMainWindow);
+    glutReshapeFunc(ReshapeMainWindow);
 
     // Initialize AntTweakBar
     TwInit(TW_OPENGL, NULL);
 
-	// Create two sub-windows
+    // Create two sub-windows
     g_SubWindowData[0].WinID = glutCreateSubWindow(mainWinID, 8, 8, 480, 464);
-	SetupSubWindow(0);
+    SetupSubWindow(0);
     g_SubWindowData[1].WinID = glutCreateSubWindow(mainWinID, 488, 8, 464, 464);
     SetupSubWindow(1);
-    
-    atexit(Terminate);  // Called after glutMainLoop ends
+
+    atexit(onTerminate);  // Called after glutMainLoop ends
 
     // Call the GLUT main loop
     glutMainLoop();

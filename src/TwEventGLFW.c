@@ -181,15 +181,16 @@ int TW_CALL TwEventCharGLFW(int glfwChar, int glfwAction)
     return 0;
 }
 
-// callbacks
+
+// Callbacks that returning error code:
 TW_EXPORT_API int twMouseButtonCallbackGLFW_d (GLFWwindow* window, int button, int action, int mods) {
     return(TwEventMouseButtonGLFW(button, action));
 }
 TW_EXPORT_API int twCursorPosCallbackGLFW_d (GLFWwindow* window, double xpos, double ypos) {
     return(TwMouseMotion((int)xpos, (int)ypos));
 }
-TW_EXPORT_API int twScrollCallbackGLFW_d (GLFWwindow* window, double xoffset, double yoffset) {
-    return(TwMouseWheel((int)yoffset));
+TW_EXPORT_API int twScrollCallbackGLFW_d (GLFWwindow* window, double offsetX, double offsetY) {
+    return(TwMouseWheel((int)offsetY));
 }
 TW_EXPORT_API int twKeyCallbackGLFW_d (GLFWwindow* window, int key, int scancode, int action, int mods) {
     return(TwEventKeyGLFW(key, action));
@@ -198,14 +199,15 @@ TW_EXPORT_API int twCharCallbackGLFW_d (GLFWwindow* window, unsigned int codepoi
     return(TwEventCharGLFW(codepoint, GLFW_PRESS));
 }
 
+// Callbacks without returning error code:
 TW_EXPORT_API void twMouseButtonCallbackGLFW (GLFWwindow* window, int button, int action, int mods) {
     twMouseButtonCallbackGLFW_d (window, button, action, mods);
 }
 TW_EXPORT_API void twCursorPosCallbackGLFW (GLFWwindow* window, double xpos, double ypos) {
     twCursorPosCallbackGLFW_d (window, xpos, ypos);
 }
-TW_EXPORT_API void twScrollCallbackGLFW (GLFWwindow* window, double xoffset, double yoffset) {
-    twScrollCallbackGLFW_d (window, xoffset, yoffset);
+TW_EXPORT_API void twScrollCallbackGLFW (GLFWwindow* window, double offsetX, double offsetY) {
+    twScrollCallbackGLFW_d (window, offsetX, offsetY);
 }
 TW_EXPORT_API void twKeyCallbackGLFW (GLFWwindow* window, int key, int scancode, int action, int mods) {
     twKeyCallbackGLFW_d (window, key, scancode, action, mods);
@@ -213,4 +215,5 @@ TW_EXPORT_API void twKeyCallbackGLFW (GLFWwindow* window, int key, int scancode,
 TW_EXPORT_API void twCharCallbackGLFW (GLFWwindow* window, unsigned int codepoint) {
     twCharCallbackGLFW_d (window, codepoint);
 }
+
 
