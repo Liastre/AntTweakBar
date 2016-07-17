@@ -12,34 +12,15 @@
 //
 //  ---------------------------------------------------------------------------
 
-
+#define ANTTWEAKBAR_USE_SDL2
 #include <AntTweakBar.h>
-
-#ifdef _WIN32
-//  MiniSDL13.h is provided to avoid the need of having SDL installed to 
-//  recompile this example. Do not use it in your own programs, better
-//  install and use the actual SDL library SDK.
-#   define USE_MINI_SDL
-#endif
 
 //#define GL3_PROTOTYPES 1 ////
 //#include <GL3/gl3.h>     ////
 
-#ifdef USE_MINI_SDL
-#   include "../src/MiniSDL13.h"
-#else
-#   include <SDL/SDL.h>
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
-#ifdef _WIN32
-#   include <windows.h> // required by gl.h
-#endif
-#include <GL/gl.h>
-#include <GL/glu.h>
 
 
 // In this example, we draw a simple rotating square using the OpenGL core profile
@@ -238,15 +219,14 @@ void Render()
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
-
 TwBar *CreateTweakBar()
 {
     TwBar *bar;
 
     // Create a tweak bar
     bar = TwNewBar("TweakBar");
-    TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with SDL and OpenGL Core Profile.\n' "); // Message added to the help bar.
-
+    // Message added to the help bar.
+    TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with SDL and OpenGL Core Profile.\n' ");
     // Add variables
     TwAddVarRW(bar, "Rotation", TW_TYPE_QUAT4F, &quat, " opened=true help='Rectangle rotation' ");
     TwAddVarRW(bar, "Color", TW_TYPE_COLOR3F, &color, " opened=true help='Rectangle color' ");
@@ -254,15 +234,21 @@ TwBar *CreateTweakBar()
     return bar;
 }
 
-
-// SDL redefines main
-#ifdef main
-#   undef main
-#endif
-
-int main()
+void onExit()
 {
-    const SDL_VideoInfo* video = NULL;
+    TwTerminate();
+    // Delete GL shaders and buffer
+    UninitRender();
+    SDL_Quit();
+    exit(EXIT_SUCCESS);
+}
+
+int main(int argc, char *argv[])
+{
+    SDL_Window* window;
+    SDL_Renderer* renderer;
+    SDL_RendererInfo rendererInfo;
+
     int width  = 480, height = 480;
     int bpp, flags;
     int quit = 0;
@@ -274,13 +260,15 @@ int main()
         SDL_Quit();
         exit(1);
     }
-    video = SDL_GetVideoInfo();
-    if (!video) 
+
+    if( SDL_CreateWindowAndRenderer(width, height, SDL_WINDOW_OPENGL, &window, &renderer) != 0 )
     {
-        fprintf(stderr, "Video query failed: %s\n", SDL_GetError());
-        SDL_Quit();
-        exit(1);
+        onExit();
     }
+    SDL_SetWindowTitle(window, "AntTweakBar example using OpenGL Core Profile and SDL");
+    SDL_GetRendererInfo(renderer, &rendererInfo);
+    SDL_GL_CreateContext(window);
+
     // Request GL context to be OpenGL 3.2 Core Profile
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
@@ -290,19 +278,10 @@ int main()
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
     //SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    bpp = video->vfmt->BitsPerPixel;
-    flags = SDL_OPENGL | SDL_HWSURFACE;
-    if (!SDL_SetVideoMode(width, height, bpp, flags))
-    {
-        fprintf(stderr, "Video mode set failed: %s\n", SDL_GetError());
-        SDL_Quit();
-        exit(1);
-    }
-    SDL_WM_SetCaption("AntTweakBar example using OpenGL Core Profile and SDL", "AntTweakBar+GLCore+SDL");
 
     // Enable SDL unicode and key-repeat
-    SDL_EnableUNICODE(1);
-    SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+    //SDL_EnableUNICODE(1);
+    //SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 
     // Load some OpenGL core functions
     if (!LoadGLCoreFunctions())
@@ -353,29 +332,39 @@ int main()
         TwDraw();
 
         // Present frame buffer
-        SDL_GL_SwapBuffers();
+        SDL_GL_SwapWindow(window);
 
         // Process incoming events
         while (SDL_PollEvent(&event)) 
         {
             // Send event to AntTweakBar
-            handled = TwEventSDL(&event, SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
+            handled = TwEventSDL2(&event);
 
             // If event has not been handled by AntTweakBar, process it
-            if (!handled)
+            switch (event.type)
             {
-                switch (event.type)
-                {
-                case SDL_QUIT:  // Window is closed
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.sym)
+                    {
+                        // exit if ESCAPE key pressed
+                        case SDLK_ESCAPE:
+                        {
+                            onExit();
+                        }
+                        default:
+                            break;
+                    }
+                    break;
+                // Window is closed
+                case SDL_QUIT:
                     quit = 1;
                     break;
-
-                case SDL_VIDEORESIZE:   // Window size has changed
+                    // Window size has changed
+                case SDL_WINDOWEVENT_RESIZED:
                     // Resize SDL video mode
-                    width = event.resize.w;
-                    height = event.resize.h;
-                    if (!SDL_SetVideoMode(width, height, bpp, flags))
-                        fprintf(stderr, "WARNING: Video mode set failed: %s\n", SDL_GetError());
+                    width = event.window.data1;
+                    height = event.window.data2;
+                    SDL_SetWindowSize(window, width, height);
 
                     // Resize OpenGL viewport
                     glViewport(0, 0, width, height);
@@ -385,9 +374,9 @@ int main()
                     
                     // TwWindowSize has been called by TwEventSDL, 
                     // so it is not necessary to call it again here.
-
                     break;
-                }
+                default:
+                    break;
             }
         }
 
@@ -396,14 +385,7 @@ int main()
 
     } // End of main loop
 
-    // Terminate AntTweakBar
-    TwTerminate();
-
-    // Delete GL shaders and buffer
-    UninitRender();
-
-    // Terminate SDL
-    SDL_Quit();
+    onExit();
 
     return 0;
 }  

@@ -13,6 +13,7 @@
 //
 //  ---------------------------------------------------------------------------
 
+#define ANTTWEAKBAR_USE_GLUT
 #include <AntTweakBar.h>
 
 #include <sstream>

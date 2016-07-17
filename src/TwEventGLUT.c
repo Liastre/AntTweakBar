@@ -17,6 +17,7 @@
 #   pragma warning(disable: 4100)   // unreferenced parameter
 #endif // _MSC_VER
 
+#define ANTTWEAKBAR_USE_GLUT
 #include <AntTweakBar.h>
 
 int TwEventMouseButtonGLUT(int button, int state, int mouseX, int mouseY)

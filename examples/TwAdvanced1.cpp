@@ -22,6 +22,7 @@
 //
 //  ---------------------------------------------------------------------------
 
+#define ANTTWEAKBAR_USE_GLFW3
 #include <AntTweakBar.h>
 
 #include <cmath>

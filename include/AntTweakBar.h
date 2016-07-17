@@ -19,7 +19,6 @@
 #ifndef TW_INCLUDED
 #define TW_INCLUDED
 
-#include "ATBConfig.hpp"
 #include "ATBIncludes.hpp"
 #include <stddef.h>
 
@@ -299,9 +298,6 @@ TW_API void     TW_CALL TwHandleErrors(TwErrorHandler errorHandler);
 #endif
 #define TwEventWin32    TwEventWin // For compatibility with AntTweakBar versions prior to 1.11
 
-// For libSDL event loop
-TW_API int      TW_CALL TwEventSDL(const void *sdlEvent, unsigned char sdlMajorVersion, unsigned char sdlMinorVersion);
-
 // GLFW events callbacks
 #ifdef ANTTWEAKBAR_USE_GLFW3
     // Callbacks that returning error code:
@@ -318,7 +314,7 @@ TW_API int      TW_CALL TwEventSDL(const void *sdlEvent, unsigned char sdlMajorV
     TW_IMPORT_API void twCharCallbackGLFW(GLFWwindow* window, unsigned int codepoint);
 #endif
 
-// GLUT event callbacks (Windows calling convention for GLUT callbacks is cdecl)
+// GLUT event callbacks
 #ifdef ANTTWEAKBAR_USE_GLUT
     TW_IMPORT_API int  twSetModifiersFuncPointerGLUT(int (TW_CALL *glutModifiersFuncPointer)(void));
     // Callbacks that returning error code:
@@ -333,8 +329,15 @@ TW_API int      TW_CALL TwEventSDL(const void *sdlEvent, unsigned char sdlMajorV
     TW_IMPORT_API void twSpecialKeyCallbackGLUT (int key, int mouseX, int mouseY);
 #endif
 
+// SDL2 event loop
+#ifdef ANTTWEAKBAR_USE_SDL2
+    TW_IMPORT_API int TwEventSDL2(const void *sdlEvent);
+#endif
+
 // SFML event loop
-TW_API int      TW_CALL TwEventSFML(const void *sfmlEvent, unsigned char sfmlMajorVersion, unsigned char sfmlMinorVersion);
+#ifdef ANTTWEAKBAR_USE_SFML2
+    TW_IMPORT_API int TwEventSFML2(const void *sfmlEvent, unsigned char sfmlMajorVersion, unsigned char sfmlMinorVersion);
+#endif
 
 // X11 event loop
 #if defined(_UNIX)

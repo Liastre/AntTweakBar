@@ -26,3 +26,5 @@ lib/*.dll
 lib/*.exp
 lib/*.so
 lib/*.so.*
+.idea/
+thirdparty/

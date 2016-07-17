@@ -11,6 +11,7 @@
 //
 //  ---------------------------------------------------------------------------
 
+#define ANTTWEAKBAR_USE_GLFW3
 #include <AntTweakBar.h>
 
 int TW_CALL TwEventMouseButtonGLFW(int glfwButton, int glfwAction)

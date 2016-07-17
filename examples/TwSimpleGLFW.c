@@ -13,6 +13,7 @@
 //
 //  ---------------------------------------------------------------------------
 
+#define ANTTWEAKBAR_USE_GLFW3
 #include <AntTweakBar.h>
 
 #include <stdio.h>
@@ -113,7 +114,6 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-
     // Initialize AntTweakBar
     TwInit(TW_OPENGL, NULL);
 
