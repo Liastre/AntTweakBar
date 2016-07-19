@@ -13,10 +13,8 @@
 
 #define ANTTWEAKBAR_USE_SDL2
 #include <AntTweakBar.h>
-//#include <SDL.h>
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
 
 void onExit()

@@ -13,31 +13,10 @@
 //
 //  ---------------------------------------------------------------------------
 
-
+#define ANTTWEAKBAR_USE_SFML2
 #include <AntTweakBar.h>
 
-#if defined(_WIN32)
-//  MiniSFML16.h is provided to avoid the need of having SFML installed to 
-//  recompile this example. Do not use it in your own programs, better
-//  install and use the actual SFML library SDK.
-#   define USE_MINI_SFML
-#endif
-
-#ifdef USE_MINI_SFML
-#   include "../src/MiniSFML16.h"
-#else
-#   include <SFML/Graphics.hpp>
-#endif
-
-#if defined(_WIN32)
-#   include <windows.h> // required by gl.h
-#endif
-#include <GL/gl.h>
-#include <GL/glu.h>
-
 #include <list>
-#include <cstdlib>
-#include <cmath>
 
 
 // Pseudo-random value between -1 and 1
@@ -91,9 +70,8 @@ int main()
 {
     // Create main window
     sf::RenderWindow app(sf::VideoMode(800, 600), "AntTweakBar simple example using SFML");
-    app.PreserveOpenGLStates(true);
 
-    // Particules
+    // Particles
     std::list<Particle> particles;
     std::list<Particle>::iterator p;
     float birthCount = 0;
@@ -110,7 +88,7 @@ int main()
     TwInit(TW_OPENGL, NULL);
 
     // Tell the window size to AntTweakBar
-    TwWindowSize(app.GetWidth(), app.GetHeight());
+    TwWindowSize(app.getSize().x, app.getSize().y);
 
     // Create a tweak bar
     TwBar *bar = TwNewBar("Particles");
@@ -139,7 +117,7 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(90.f, (float)app.GetWidth()/app.GetHeight(), 0.1f, 100.f);
+    gluPerspective(90.f, (float)app.getSize().y/app.getSize().x, 0.1f, 100.f);
     glMatrixMode(GL_MODELVIEW);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -149,33 +127,33 @@ int main()
 
     // Init time
     sf::Clock clock;
-    float time = clock.GetElapsedTime();
+    float time = clock.getElapsedTime().asSeconds();
 
     // Main loop
-    while (app.IsOpened())
+    while (app.isOpen())
     {
         // Process events
         sf::Event event;
-        while (app.GetEvent(event))
+        while (app.pollEvent(event))
         {
             // Send event to AntTweakBar
-            int handled = TwEventSFML(&event, 1, 6); // Assume SFML version 1.6 here
+            int handled = TwEventSFML2(&event);
 
             // If event has not been handled by AntTweakBar, process it
             if( !handled )
             {
                 // Close or Escape
-                if (event.Type == sf::Event::Closed
-                    || (event.Type == sf::Event::KeyPressed && event.Key.Code == sf::Key::Escape))
-                    app.Close();
+                if (event.type == sf::Event::Closed
+                    || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
+                    app.close();
 
                 // Resize
-                if (event.Type == sf::Event::Resized)
+                if (event.type == sf::Event::Resized)
                 {
-                    glViewport(0, 0, event.Size.Width, event.Size.Height);
+                    glViewport(0, 0, event.size.width, event.size.height);
                     glMatrixMode(GL_PROJECTION);
                     glLoadIdentity();
-                    gluPerspective(90.f, (float)event.Size.Width/event.Size.Height, 1.f, 500.f);
+                    gluPerspective(90.f, (float)event.size.width/event.size.height, 1.f, 500.f);
                     glMatrixMode(GL_MODELVIEW);
 
                     // TwWindowSize has been called by TwEventSFML, 
@@ -184,11 +162,11 @@ int main()
             }
         }
 
-        if (!app.IsOpened())
+        if (!app.isOpen())
             continue;
 
         // Update time
-        float dt = clock.GetElapsedTime() - time;
+        float dt = clock.getElapsedTime().asSeconds() - time;
         if (dt < 0) dt = 0;
         time += dt;
 
@@ -239,7 +217,7 @@ int main()
         TwDraw();
 
         // Finally, display the rendered frame on screen
-        app.Display();
+        app.display();
     }
 
     // Un-initialize AntTweakBar 

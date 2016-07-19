@@ -14,7 +14,8 @@
 #define ANTTWEAKBAR_USE_GLFW3
 #include <AntTweakBar.h>
 
-int TW_CALL TwEventMouseButtonGLFW(int glfwButton, int glfwAction)
+
+int TwEventMouseButtonGLFW(int glfwButton, int glfwAction)
 {
     int handled = 0;
     TwMouseAction action = (glfwAction==GLFW_PRESS) ? TW_MOUSE_PRESSED : TW_MOUSE_RELEASED;
@@ -31,7 +32,7 @@ int TW_CALL TwEventMouseButtonGLFW(int glfwButton, int glfwAction)
 
 int g_KMod = 0;
 
-int TW_CALL TwEventKeyGLFW(int glfwKey, int glfwAction)
+int TwEventKeyGLFW(int glfwKey, int glfwAction)
 {
     int handled = 0;
 
@@ -174,14 +175,13 @@ int TW_CALL TwEventKeyGLFW(int glfwKey, int glfwAction)
     return handled;
 }
 
-int TW_CALL TwEventCharGLFW(int glfwChar, int glfwAction)
+int TwEventCharGLFW(int glfwChar, int glfwAction)
 {
     if( glfwAction==GLFW_PRESS && (glfwChar & 0xff00)==0 )
         return TwKeyPressed(glfwChar, g_KMod);
 
     return 0;
 }
-
 
 // Callbacks that returning error code:
 TW_EXPORT_API int twMouseButtonCallbackGLFW_d (GLFWwindow* window, int button, int action, int mods) {

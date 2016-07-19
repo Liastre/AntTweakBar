@@ -336,7 +336,7 @@ TW_API void     TW_CALL TwHandleErrors(TwErrorHandler errorHandler);
 
 // SFML event loop
 #ifdef ANTTWEAKBAR_USE_SFML2
-    TW_IMPORT_API int TwEventSFML2(const void *sfmlEvent, unsigned char sfmlMajorVersion, unsigned char sfmlMinorVersion);
+    TW_IMPORT_API int TwEventSFML2(const void *sfmlEvent);
 #endif
 
 // X11 event loop
