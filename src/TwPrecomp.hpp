@@ -23,23 +23,10 @@
 #   define _CRT_SECURE_NO_DEPRECATE // visual 8 secure crt warning
 #endif
 
-#include <cstdio>
-#include <cassert>
-#include <cmath>
-#include <cfloat>
-#include <cstring>
-#include <cstdlib>
-#include <memory.h>
-
 #if defined(_MSC_VER) && _MSC_VER<=1200
 #   pragma warning(push, 3)
 #endif
-#include <string>
-#include <sstream>
-#include <vector>
-#include <map>
-#include <list>
-#include <set>
+
 #if defined(_MSC_VER) && _MSC_VER<=1200
 #   pragma warning(pop)
 #endif
@@ -79,15 +66,6 @@
 #   endif
 #   include <windows.h>
 #   include <shellapi.h>
-#endif
-
-#if !defined(ANT_OGL_HEADER_INCLUDED)
-#   if defined(ANT_OSX)
-#   	include <OpenGL/gl.h>
-#   else
-#	    include <GL/gl.h>  // must be included after windows.h
-#   endif
-#   define  ANT_OGL_HEADER_INCLUDED
 #endif
 
 #endif  // !defined ANT_TW_PRECOMP_INCLUDED

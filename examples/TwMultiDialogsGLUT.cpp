@@ -13,16 +13,15 @@
 //
 //  ---------------------------------------------------------------------------
 
+#define ANTTWEAKBAR_USE_OPENGL
 #define ANTTWEAKBAR_USE_GLUT
-#include <AntTweakBar.h>
+#include <AntTweakBar.hpp>
 
 #include <sstream>
 #include <vector>
 #include <cstring>
-
-#if !defined _MSC_VER
-#   define _snprintf snprintf
-#endif
+#include <cstdlib>
+#include <malloc.h>
 
 
 // ---------------------------------------------------------------------------
@@ -280,7 +279,7 @@ int main(int argc, char *argv[])
     // Set GLUT callbacks
     glutDisplayFunc(OnDisplay);
     glutReshapeFunc(OnReshape);
-    atexit(onTerminate);  // Called after glutMainLoop ends
+    std::atexit(onTerminate);  // Called after glutMainLoop ends
 
     // Initialize AntTweakBar
     TwInit(TW_OPENGL, NULL);

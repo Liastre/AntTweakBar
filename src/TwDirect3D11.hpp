@@ -14,7 +14,7 @@
 #if !defined ANT_TW_DIRECT3D11_INCLUDED
 #define ANT_TW_DIRECT3D11_INCLUDED
 
-#include "TwGraph.h"
+#include "TwGraph.hpp"
 
 //  ---------------------------------------------------------------------------
 

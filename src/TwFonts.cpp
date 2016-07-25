@@ -7,10 +7,12 @@
 //
 //  ---------------------------------------------------------------------------
 
+#include "TwPrecomp.hpp"
+#include "TwMgr.hpp"
+#include "TwFonts.hpp"
+#include <cstring>
+#include <cassert>
 
-#include "TwPrecomp.h"
-#include "TwMgr.h"
-#include "TwFonts.h"
 
 // Fedora patch: memset()
 using std::memset;

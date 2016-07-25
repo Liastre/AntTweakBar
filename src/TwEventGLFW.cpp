@@ -12,7 +12,7 @@
 //  ---------------------------------------------------------------------------
 
 #define ANTTWEAKBAR_USE_GLFW3
-#include <AntTweakBar.h>
+#include <AntTweakBar.hpp>
 
 
 int TwEventMouseButtonGLFW(int glfwButton, int glfwAction)

@@ -15,7 +15,7 @@
 //  ---------------------------------------------------------------------------
 
 #define ANTTWEAKBAR_USE_SDL2
-#include <AntTweakBar.h>
+#include <AntTweakBar.hpp>
 
 
 // TwEventSDL returns zero if msg has not been handled,

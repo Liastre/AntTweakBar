@@ -12,10 +12,12 @@
 //  
 //  ---------------------------------------------------------------------------
 
+#define ANTTWEAKBAR_USE_OPENGL
 #define ANTTWEAKBAR_USE_GLUT
-#include <AntTweakBar.h>
+#include <AntTweakBar.hpp>
 
 #include <math.h>
+#include <cstdlib>
 
 
 // This example displays one of the following shapes in each sub-window
@@ -436,7 +438,7 @@ int main(int argc, char *argv[])
     g_SubWindowData[1].WinID = glutCreateSubWindow(mainWinID, 488, 8, 464, 464);
     SetupSubWindow(1);
 
-    atexit(onTerminate);  // Called after glutMainLoop ends
+    std::atexit(onTerminate);  // Called after glutMainLoop ends
 
     // Call the GLUT main loop
     glutMainLoop();

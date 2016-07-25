@@ -18,10 +18,12 @@
 #   include <OpenGL/gl3.h>
 #   define ANT_OGL_HEADER_INCLUDED
 #endif
-#include "TwPrecomp.h"
-#include "LoadOGLCore.h"
-#include "TwOpenGLCore.h"
-#include "TwMgr.h"
+#include "TwPrecomp.hpp"
+#include "LoadOGLCore.hpp"
+#include "TwOpenGLCore.hpp"
+#include "TwMgr.hpp"
+#include <cassert>
+
 
 using namespace std;
 

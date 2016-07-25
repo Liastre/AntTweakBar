@@ -13,16 +13,18 @@
 //
 //  ---------------------------------------------------------------------------
 
+#define ANTTWEAKBAR_USE_OPENGL
 #define ANTTWEAKBAR_USE_SFML2
-#include <AntTweakBar.h>
+#include <AntTweakBar.hpp>
 
 #include <list>
+#include <cstdlib>
 
 
 // Pseudo-random value between -1 and 1
 float Random() 
 {
-    return 2.0f * ((float)rand() / RAND_MAX) - 1.0f;
+    return 2.0f * ((float)std::rand() / RAND_MAX) - 1.0f;
 }
 
 // Particle randomly initialized
@@ -223,5 +225,5 @@ int main()
     // Un-initialize AntTweakBar 
     TwTerminate();
 
-    return EXIT_SUCCESS;
+    return 0;
 }

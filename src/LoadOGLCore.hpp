@@ -11,8 +11,11 @@
 //  ---------------------------------------------------------------------------
 
 
-#if !defined ANT_LOAD_OGL_CORE_INCLUDED
+#ifndef ANT_LOAD_OGL_CORE_INCLUDED
 #define ANT_LOAD_OGL_CORE_INCLUDED
+
+#define ANTTWEAKBAR_USE_OPENGL
+#include <ATBIncludes.hpp>
 
 
 #define ANT_GL_CORE_DECL_NO_FORWARD(_Ret, _Fct, _Params) \

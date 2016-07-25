@@ -7,11 +7,10 @@
 //
 //  ---------------------------------------------------------------------------
 
-
-#include "TwPrecomp.h"
-#include "LoadOGLCore.h"
-
-//  ---------------------------------------------------------------------------
+#include "TwPrecomp.hpp"
+#include "LoadOGLCore.hpp"
+#include <cassert>
+#include <iostream>
 
 #define ANT_NB_OGL_CORE_FUNC_MAX 512
 
@@ -429,7 +428,7 @@ namespace GLCore { PFNGLGetProcAddress _glGetProcAddress = NULL; }
         {
             if( g_NbOGLCoreFunc>=ANT_NB_OGL_CORE_FUNC_MAX )
             {
-                fprintf(stderr, "Too many OpenGL Core functions declared. Change ANT_NB_OGL_CORE_FUNC_MAX.");
+                std::cerr << "Too many OpenGL Core functions declared. Change ANT_NB_OGL_CORE_FUNC_MAX.";
                 exit(-1);
             }
     

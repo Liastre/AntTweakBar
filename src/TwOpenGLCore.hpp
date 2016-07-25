@@ -11,12 +11,15 @@
 //  ---------------------------------------------------------------------------
 
 
-#if !defined ANT_TW_OPENGL_CORE_INCLUDED
+#ifndef ANT_TW_OPENGL_CORE_INCLUDED
 #define ANT_TW_OPENGL_CORE_INCLUDED
 
-#include "TwGraph.h"
+#include "TwGraph.hpp"
+#include <vector>
+#include <vector>
+#define ANTTWEAKBAR_USE_OPENGL
+#include <ATBIncludes.hpp>
 
-//  ---------------------------------------------------------------------------
 
 class CTwGraphOpenGLCore : public ITwGraph
 {
@@ -112,10 +115,7 @@ protected:
         std::vector<color32>m_Colors;
         std::vector<color32>m_BgColors;
     };
-    void                ResizeTriBuffers(size_t _NewSize);
+    void ResizeTriBuffers(size_t _NewSize);
 };
-
-//  ---------------------------------------------------------------------------
-
 
 #endif // !defined ANT_TW_OPENGL_CORE_INCLUDED

@@ -13,16 +13,19 @@
 #if !defined ANT_TW_MGR_INCLUDED
 #define ANT_TW_MGR_INCLUDED
 
-#include <AntTweakBar.h>
+#include <AntTweakBar.hpp>
 #include "MiniFloat.hpp"
 
 #define ANT_CALL TW_CALL
 
-#include "TwColors.h"
-#include "TwFonts.h"
-#include "TwGraph.h"
-#include "AntPerfTimer.h"
+#include "TwColors.hpp"
+#include "TwFonts.hpp"
+#include "TwGraph.hpp"
+#include "AntPerfTimer.hpp"
 
+#include <vector>
+#include <map>
+#include <list>
 
 //#define BENCH // uncomment to activate benchmarks
 

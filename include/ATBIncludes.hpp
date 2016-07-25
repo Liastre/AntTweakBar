@@ -1,7 +1,8 @@
 // =============== DESCRIPTION ===============
 // Include this header for easy third party
 // headers management. Use next defines:
-// ANTTWEAKBAR_USE_GLFW
+// ANTTWEAKBAR_USE_GLFW3
+// ANTTWEAKBAR_USE_SFML2
 // ANTTWEAKBAR_USE_GLUT
 // ANTTWEAKBAR_USE_SDL2
 // ===========================================
@@ -9,13 +10,12 @@
 #ifndef ANTTWEAKBAR_ATBINCLUDES_HPP
 #define ANTTWEAKBAR_ATBINCLUDES_HPP
 
-#if defined(ANTTWEAKBAR_USE_GLFW3)  ||\
-    defined(ANTTWEAKBAR_USE_SFML2)  ||\
-    defined(ANTTWEAKBAR_USE_GLUT)   ||\
-    defined(ANTTWEAKBAR_USE_SDL2)
+#if defined(ANTTWEAKBAR_USE_OPENGL)
+// OS specified includes start
 #   if defined(_WIN32) || defined(_WIN64)
 #       include <windows.h>
 #   endif
+//  OS specified includes end
 #   include <GL/gl.h>
 #   include <GL/glu.h>
 #endif

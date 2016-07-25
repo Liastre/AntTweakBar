@@ -20,31 +20,11 @@
 #define TW_INCLUDED
 
 #include "ATBIncludes.hpp"
-#include <stddef.h>
+#include <cstddef>
+#include <string>
 
 #define TW_VERSION  116 // Version Mmm : M=Major mm=minor (e.g., 102 is version 1.02)
 
-
-#ifdef  __cplusplus
-#   if defined(_MSC_VER)
-#       pragma warning(push)
-#       pragma warning(disable: 4995 4530)
-#       include <string>
-#       pragma warning(pop)
-#   else
-#       include <string>
-#   endif
-    extern "C" {
-#endif  // __cplusplus
-
-
-// ----------------------------------------------------------------------------
-//  OS specific includes and definitions
-// ----------------------------------------------------------------------------
-
-#if (defined(_WIN32) || defined(_WIN64))
-#   include <windows.h>
-#endif
 
 // ----------------------------------------------------------------------------
 //  OS specific includes and definitions
@@ -171,11 +151,9 @@ TW_API TwType   TW_CALL TwDefineStruct(const char *name, const TwStructMember *s
 typedef void (TW_CALL * TwCopyCDStringToClient)(char **destinationClientStringPtr, const char *sourceString);
 TW_API void     TW_CALL TwCopyCDStringToClientFunc(TwCopyCDStringToClient copyCDStringFunc);
 TW_API void     TW_CALL TwCopyCDStringToLibrary(char **destinationLibraryStringPtr, const char *sourceClientString);
-#ifdef __cplusplus
 typedef void (TW_CALL * TwCopyStdStringToClient)(std::string& destinationClientString, const std::string& sourceString);
 TW_API void     TW_CALL TwCopyStdStringToClientFunc(TwCopyStdStringToClient copyStdStringToClientFunc);
 TW_API void     TW_CALL TwCopyStdStringToLibrary(std::string& destinationLibraryString, const std::string& sourceClientString);
-#endif // __cplusplus
 
 typedef enum ETwParamValueType
 {
@@ -367,11 +345,5 @@ TW_COMPILE_TIME_ASSERT(TW_DOUBLE,  sizeof(double)  == 8);
 #endif
 
 //  ---------------------------------------------------------------------------
-
-
-#ifdef  __cplusplus
-    }   // extern "C"
-#endif  // __cplusplus
-
 
 #endif  // !defined TW_INCLUDED

@@ -12,7 +12,7 @@
 //  ---------------------------------------------------------------------------
 
 #define ANTTWEAKBAR_USE_SFML2
-#include <AntTweakBar.h>
+#include <AntTweakBar.hpp>
 
 
 //  TwEventSFML returns zero if msg has not been handled, 

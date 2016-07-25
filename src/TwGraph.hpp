@@ -11,14 +11,14 @@
 //  ---------------------------------------------------------------------------
 
 
-#if !defined ANT_TW_GRAPH_INCLUDED
+#ifndef ANT_TW_GRAPH_INCLUDED
 #define ANT_TW_GRAPH_INCLUDED
 
-#include "TwColors.h"
-#include "TwFonts.h"
+#include "TwColors.hpp"
+#include "TwFonts.hpp"
 
+#include <string>
 
-//  ---------------------------------------------------------------------------
 
 #ifdef DrawText     // DirectX redefines 'DrawText' !!
 #   undef DrawText
@@ -52,7 +52,5 @@ public:
 
     virtual             ~ITwGraph() {}  // required by gcc
 };
-
-//  ---------------------------------------------------------------------------
 
 #endif  // ANT_TW_GRAPH_INCLUDED

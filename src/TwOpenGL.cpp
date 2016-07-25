@@ -8,10 +8,12 @@
 //  ---------------------------------------------------------------------------
 
 
-#include "TwPrecomp.h"
-#include "LoadOGL.h"
-#include "TwOpenGL.h"
-#include "TwMgr.h"
+#include "TwPrecomp.hpp"
+#include "LoadOGL.hpp"
+#include "TwOpenGL.hpp"
+#include "TwMgr.hpp"
+
+#include <cassert>
 
 using namespace std;
 

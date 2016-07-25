@@ -1,23 +1,24 @@
-//  ---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 //
-//  @file       TwSimpleGLFW.c
+//  @file       TwSimpleGLFW.cpp
 //  @brief      A simple example that uses AntTweakBar with 
 //              OpenGL and the GLFW windowing system.
 //
 //              AntTweakBar: http://anttweakbar.sourceforge.net/doc
 //              OpenGL:      http://www.opengl.org
 //              GLFW:        http://www.glfw.org
-//  
+//
 //  @author     Philippe Decaudin
 //  @date       2006/05/20
 //
-//  ---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 
+#define ANTTWEAKBAR_USE_OPENGL
 #define ANTTWEAKBAR_USE_GLFW3
-#include <AntTweakBar.h>
+#include <AntTweakBar.hpp>
 
-#include <stdio.h>
-
+#include <cstdio>
+#include <iostream>
 
 // Callback function called by GLFW when window size changes
 void windowSizeCallback(GLFWwindow* window, int width, int height)
@@ -108,7 +109,7 @@ int main()
     if( !window )
     {
         // A fatal error occured
-        fprintf(stderr, "Cannot open GLFW window\n");
+        std::cerr << "Cannot open GLFW window" << std::endl;
         glfwTerminate();
         exit(EXIT_FAILURE);
     }

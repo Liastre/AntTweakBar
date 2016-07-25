@@ -8,8 +8,8 @@
 //  ---------------------------------------------------------------------------
 
 
-#include "TwPrecomp.h"
-#include "TwColors.h"
+#include "TwPrecomp.hpp"
+#include "TwColors.hpp"
 
 
 void ColorRGBToHLSf(float _R, float _G, float _B, float *_Hue, float *_Light, float *_Saturation)

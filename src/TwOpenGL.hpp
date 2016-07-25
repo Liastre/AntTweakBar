@@ -11,12 +11,16 @@
 //  ---------------------------------------------------------------------------
 
 
-#if !defined ANT_TW_OPENGL_INCLUDED
+#ifndef ANT_TW_OPENGL_INCLUDED
 #define ANT_TW_OPENGL_INCLUDED
 
-#include "TwGraph.h"
+#include "TwGraph.hpp"
+#include <vector>
+#define ANTTWEAKBAR_USE_OPENGL
+#include <ATBIncludes.hpp>
+#include <windows.h>
+#include <GL/gl.h>
 
-//  ---------------------------------------------------------------------------
 
 class CTwGraphOpenGL : public ITwGraph
 {
@@ -92,7 +96,4 @@ protected:
     };
 };
 
-//  ---------------------------------------------------------------------------
-
-
-#endif // !defined ANT_TW_OPENGL_INCLUDED
+#endif // ANT_TW_OPENGL_INCLUDED

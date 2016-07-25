@@ -7,12 +7,11 @@
 //
 //  ---------------------------------------------------------------------------
 
+#include "TwPrecomp.hpp"
+#include "LoadOGL.hpp"
+#include <cassert>
+#include <iostream>
 
-#include "TwPrecomp.h"
-#include "LoadOGL.h"
-
-
-//  ---------------------------------------------------------------------------
 
 #define ANT_NB_OGL_FUNC_MAX 1024
 
@@ -456,7 +455,7 @@ namespace GL { PFNGLGetProcAddress _glGetProcAddress = NULL; }
         {
             if( g_NbOGLFunc>=ANT_NB_OGL_FUNC_MAX )
             {
-                fprintf(stderr, "Too many OpenGL functions declared. Change ANT_NB_OGL_FUNC_MAX.");
+                std::cerr << "Too many OpenGL functions declared. Change ANT_NB_OGL_FUNC_MAX.";
                 exit(-1);
             }
     

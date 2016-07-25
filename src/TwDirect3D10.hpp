@@ -11,10 +11,10 @@
 //  ---------------------------------------------------------------------------
 
 
-#if !defined ANT_TW_DIRECT3D10_INCLUDED
+#ifndef ANT_TW_DIRECT3D10_INCLUDED
 #define ANT_TW_DIRECT3D10_INCLUDED
 
-#include "TwGraph.h"
+#include "TwGraph.hpp"
 
 //  ---------------------------------------------------------------------------
 

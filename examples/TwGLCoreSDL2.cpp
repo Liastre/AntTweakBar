@@ -12,8 +12,9 @@
 //
 //  ---------------------------------------------------------------------------
 
+#define ANTTWEAKBAR_USE_OPENGL
 #define ANTTWEAKBAR_USE_SDL2
-#include <AntTweakBar.h>
+#include <AntTweakBar.hpp>
 
 //#define GL3_PROTOTYPES 1 ////
 //#include <GL3/gl3.h>     ////
@@ -147,14 +148,14 @@ float FLOAT_PI = 3.14159265f;
 void InitRender()
 {
     // Vertex shader
-    char *vsource[] = {
+    const char *vsource = {
         "#version 150 core\n"
         "uniform float cosa, sina;"
         "in vec3 vertex;"
         "void main() { gl_Position = vec4(cosa*vertex.x-sina*vertex.y, sina*vertex.x+cosa*vertex.y, 0, 1); }"
     };
     // Fragment shader
-    char *fsource[] = {
+    const char *fsource = {
         "#version 150 core\n"
         "uniform vec3 color;"
         "out vec4 fcolor;"
@@ -173,8 +174,8 @@ void InitRender()
     vshader = _glCreateShader(GL_VERTEX_SHADER);
     fshader = _glCreateShader(GL_FRAGMENT_SHADER);
     program = _glCreateProgram();
-    _glShaderSource(vshader, 1, vsource, NULL);
-    _glShaderSource(fshader, 1, fsource, NULL);
+    _glShaderSource(vshader, 1, &vsource, NULL);
+    _glShaderSource(fshader, 1, &fsource, NULL);
     _glCompileShader(vshader);
     _glCompileShader(fshader);
     _glAttachShader(program, vshader);

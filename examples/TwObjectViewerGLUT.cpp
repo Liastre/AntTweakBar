@@ -12,10 +12,12 @@
 //
 //  ---------------------------------------------------------------------------
 
+#define ANTTWEAKBAR_USE_OPENGL
 #define ANTTWEAKBAR_USE_GLUT
-#include <AntTweakBar.h>
+#include <AntTweakBar.hpp>
 
 #include <math.h>
+#include <cstdlib>
 
 
 // This example displays one of the following shapes
@@ -238,7 +240,7 @@ int main(int argc, char *argv[])
     // Set GLUT callbacks
     glutDisplayFunc(Display);
     glutReshapeFunc(Reshape);
-    atexit(onTerminate);  // Called after glutMainLoop ends
+    std::atexit(onTerminate);  // Called after glutMainLoop ends
 
     // Initialize AntTweakBar
     TwInit(TW_OPENGL, NULL);

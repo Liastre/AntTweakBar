@@ -18,7 +18,7 @@
 #endif // _MSC_VER
 
 #define ANTTWEAKBAR_USE_GLUT
-#include <AntTweakBar.h>
+#include <AntTweakBar.hpp>
 
 int TwEventMouseButtonGLUT(int button, int state, int mouseX, int mouseY)
 {

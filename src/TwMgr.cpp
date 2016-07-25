@@ -8,18 +8,28 @@
 //  ---------------------------------------------------------------------------
 
 
-#include "TwPrecomp.h"
-#include <AntTweakBar.h>
-#include "TwMgr.h"
-#include "TwBar.h"
-#include "TwFonts.h"
-#include "TwOpenGL.h"
-#include "TwOpenGLCore.h"
+#include "TwPrecomp.hpp"
+#include <AntTweakBar.hpp>
+#include "TwMgr.hpp"
+#include "TwBar.hpp"
+#include "TwFonts.hpp"
+#include "TwOpenGL.hpp"
+#include "TwOpenGLCore.hpp"
+
+#include <cstdlib>
+#include <map>
+#include <set>
+#include <vector>
+#include <cassert>
+#include <cmath>
+#include <sstream>
+
+
 #ifdef ANT_WINDOWS
-#   include "TwDirect3D9.h"
-#   include "TwDirect3D10.h"
-#   include "TwDirect3D11.h"
-#   include "resource.h"
+#   include "TwDirect3D9.hpp"
+#   include "TwDirect3D10.hpp"
+#   include "TwDirect3D11.hpp"
+#   include "resource.hpp"
 #   ifdef _DEBUG
 #       include <crtdbg.h>
 #   endif // _DEBUG
@@ -831,10 +841,10 @@ void CQuaternionExt::ConvertToAxisAngle()
             a = 0;
         else
         {
-            a = acos(Qs);
+            a = (double)acos(Qs);
             if( a*Angle<0 ) // Preserve the sign of Angle
                 a = -a;
-            double f = 1.0f / sin(a);
+            double f = (double)(1.0f / sin(a));
             Vx = Qx * f;
             Vy = Qy * f;
             Vz = Qz * f;
@@ -1008,7 +1018,7 @@ void CQuaternionExt::CreateSphere()
                     x = (1.0f-u[l]-v[l])*xa + u[l]*xb + v[l]*xc;
                     y = (1.0f-u[l]-v[l])*ya + u[l]*yb + v[l]*yc;
                     z = (1.0f-u[l]-v[l])*za + u[l]*zb + v[l]*zc;
-                    norm = sqrtf(x*x+y*y+z*z);
+                    norm = sqrt(x*x+y*y+z*z);
                     x /= norm; y /= norm; z /= norm;
                     s_SphTri.push_back(x); s_SphTri.push_back(y); s_SphTri.push_back(z);
                     if( u[l]+v[l]>FLOAT_EPS )
@@ -1049,10 +1059,10 @@ void CQuaternionExt::CreateArrow()
         a1 = 2.0f*FLOAT_PI*(float(i+1))/SUBDIV;
         x0 = ARROW_BGN;
         x1 = ARROW_END-CONE_LENGTH;
-        y0 = cosf(a0);
-        z0 = sinf(a0);
-        y1 = cosf(a1);
-        z1 = sinf(a1);
+        y0 = cos(a0);
+        z0 = sin(a0);
+        y1 = cos(a1);
+        z1 = sin(a1);
         s_ArrowTri[ARROW_CYL].push_back(x1); s_ArrowTri[ARROW_CYL].push_back(CYL_RADIUS*y0); s_ArrowTri[ARROW_CYL].push_back(CYL_RADIUS*z0);
         s_ArrowTri[ARROW_CYL].push_back(x0); s_ArrowTri[ARROW_CYL].push_back(CYL_RADIUS*y0); s_ArrowTri[ARROW_CYL].push_back(CYL_RADIUS*z0);
         s_ArrowTri[ARROW_CYL].push_back(x0); s_ArrowTri[ARROW_CYL].push_back(CYL_RADIUS*y1); s_ArrowTri[ARROW_CYL].push_back(CYL_RADIUS*z1);
@@ -1074,7 +1084,7 @@ void CQuaternionExt::CreateArrow()
         x0 = ARROW_END-CONE_LENGTH;
         x1 = ARROW_END;
         nx = CONE_RADIUS/(x1-x0);
-        nn = 1.0f/sqrtf(nx*nx+1);
+        nn = 1.0f/sqrt(nx*nx+1);
         s_ArrowTri[ARROW_CONE].push_back(x1); s_ArrowTri[ARROW_CONE].push_back(0); s_ArrowTri[ARROW_CONE].push_back(0);
         s_ArrowTri[ARROW_CONE].push_back(x0); s_ArrowTri[ARROW_CONE].push_back(CONE_RADIUS*y0); s_ArrowTri[ARROW_CONE].push_back(CONE_RADIUS*z0);
         s_ArrowTri[ARROW_CONE].push_back(x0); s_ArrowTri[ARROW_CONE].push_back(CONE_RADIUS*y1); s_ArrowTri[ARROW_CONE].push_back(CONE_RADIUS*z1);
@@ -1118,8 +1128,8 @@ static inline void QuatFromAxisAngle(double *out, const double *axis, double ang
     if( fabs(n)>DOUBLE_EPS )
     {
         double f = 0.5*angle;
-        out[3] = cos(f);
-        f = sin(f)/sqrt(n);
+        out[3] = (double)std::cos(f);
+        f = (double)(std::sin(f)/std::sqrt(n));
         out[0] = axis[0]*f;
         out[1] = axis[1]*f;
         out[2] = axis[2]*f;
@@ -1174,7 +1184,7 @@ void CQuaternionExt::QuatFromDir(double *outQx, double *outQy, double *outQz, do
 {
     // compute a quaternion that rotates (1,0,0) to (dx,dy,dz)
 
-    double dn = sqrt(dx*dx + dy*dy + dz*dz);
+    double dn = (double)sqrt(dx*dx + dy*dy + dz*dz);
     if( dn<DOUBLE_EPS_SQ )
     {
         *outQx = *outQy = *outQz = 0;
@@ -1188,7 +1198,7 @@ void CQuaternionExt::QuatFromDir(double *outQx, double *outQy, double *outQz, do
             rotAxis[0] = rotAxis[1] = 0;
             rotAxis[2] = 1;
         }
-        double rotAngle = acos(dx/dn);
+        double rotAngle = (double)acos(dx/dn);
         double rotQuat[4];
         QuatFromAxisAngle(rotQuat, rotAxis, rotAngle);
         *outQx = rotQuat[0];
@@ -1322,7 +1332,7 @@ void CQuaternionExt::DrawCB(int w, int h, void *_ExtValue, void *_ClientData, Tw
         qs = 1;
     }
 
-    double normDir = sqrt(ext->m_Dir[0]*ext->m_Dir[0] + ext->m_Dir[1]*ext->m_Dir[1] + ext->m_Dir[2]*ext->m_Dir[2]);
+    double normDir = (double)sqrt(ext->m_Dir[0]*ext->m_Dir[0] + ext->m_Dir[1]*ext->m_Dir[1] + ext->m_Dir[2]*ext->m_Dir[2]);
     bool drawDir = ext->m_IsDir || (normDir>DOUBLE_EPS);
     color32 alpha = ext->m_Highlighted ? 0xffffffff : 0xb0ffffff;
     
@@ -1391,7 +1401,7 @@ void CQuaternionExt::DrawCB(int w, int h, void *_ExtValue, void *_ClientData, Tw
                 triProj[2*i+0] = QuatPX(x, w, h);
                 triProj[2*i+1] = QuatPY(y, w, h);
                 color32 col = (ext->m_DirColor|0xff000000) & alpha;
-                colLight[i] = ColorBlend(0xff000000, col, fabsf(TClamp(nz, -1.0f, 1.0f)));
+                colLight[i] = ColorBlend(0xff000000, col, fabs(TClamp(nz, -1.0f, 1.0f)));
             }
             if( s_ArrowTri[j].size()>=9 ) // 1 tri = 9 floats
                 g_TwMgr->m_Graph->DrawTriangles((int)s_ArrowTri[j].size()/9, triProj, colLight, cull);
@@ -1469,7 +1479,7 @@ void CQuaternionExt::DrawCB(int w, int h, void *_ExtValue, void *_ClientData, Tw
                         alphaFade *= (1.0f-fade);
                         color32 alphaFadeCol = Color32FromARGBf(alphaFade, 1, 1, 1);
                         color32 col = (l==0) ? 0xffff0000 : ( (l==1) ? 0xff00ff00 : 0xff0000ff );
-                        colLight[i] = ColorBlend(0xff000000, col, fabsf(TClamp(nz, -1.0f, 1.0f))) & alphaFadeCol;
+                        colLight[i] = ColorBlend(0xff000000, col, fabs(TClamp(nz, -1.0f, 1.0f))) & alphaFadeCol;
                     }
                     if( s_ArrowTri[j].size()>=9 ) // 1 tri = 9 floats
                         g_TwMgr->m_Graph->DrawTriangles((int)s_ArrowTri[j].size()/9, triProj, colLight, cull);
@@ -1490,7 +1500,7 @@ void CQuaternionExt::DrawCB(int w, int h, void *_ExtValue, void *_ClientData, Tw
                     ext->Permute(&x, &y, &z, x, y, z);
                     triProj[2*i+0] = QuatPX(x, w, h);
                     triProj[2*i+1] = QuatPY(y, w, h);
-                    colLight[i] = ColorBlend(0xff000000, col[i], fabsf(TClamp(z/SPH_RADIUS, -1.0f, 1.0f))) & alpha;
+                    colLight[i] = ColorBlend(0xff000000, col[i], fabs(TClamp(z/SPH_RADIUS, -1.0f, 1.0f))) & alpha;
                 }
                 g_TwMgr->m_Graph->DrawTriangles((int)s_SphTri.size()/9, triProj, colLight, cull);
             }
@@ -5196,7 +5206,7 @@ bool TwGetKeyCode(int *_Code, int *_Modif, const char *_String)
     else // ALT and ALTGR are exclusive
         if( strstr(up, "ALT")!=NULL )   
             *_Modif |= TW_KMOD_ALT;
-    free(up);
+    std::free(up);
 
     if( strlen(CodeStr)==1 )
         *_Code = (unsigned char)(CodeStr[0]);
@@ -5261,7 +5271,7 @@ bool TwGetKeyCode(int *_Code, int *_Modif, const char *_String)
             Ok = false;
     }
 
-    free(CodeStr);
+    std::free(CodeStr);
     return Ok;
 }
 

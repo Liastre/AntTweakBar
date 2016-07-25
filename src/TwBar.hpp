@@ -11,13 +11,16 @@
 //  ---------------------------------------------------------------------------
 
 
-#if !defined ANT_TW_BAR_INCLUDED
+#ifndef ANT_TW_BAR_INCLUDED
 #define ANT_TW_BAR_INCLUDED
 
-#include <AntTweakBar.h>
-#include "TwColors.h"
-  
-#define ANT_TWEAK_BAR_DLL "AntTweakBar"
+#include <AntTweakBar.hpp>
+#include "TwColors.hpp"
+
+#include <vector>
+#include <map>
+
+#define ANT_TWEAK_BAR_DLL "AntTweakBar-18"
 
 
 //  ---------------------------------------------------------------------------

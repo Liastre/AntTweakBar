@@ -22,11 +22,13 @@
 //
 //  ---------------------------------------------------------------------------
 
+#define ANTTWEAKBAR_USE_OPENGL
 #define ANTTWEAKBAR_USE_GLFW3
-#include <AntTweakBar.h>
+#include <AntTweakBar.hpp>
 
 #include <cmath>
 #include <iostream>
+#include <cstdlib>
 
 
 const float FLOAT_2PI = 6.283185307f; // 2*PI
@@ -149,14 +151,14 @@ void Scene::Init(bool changeLights)
     if( changeLights )
         for(int i=0; i<maxLights; ++i)
         {
-            lights[i].Dist0     = 0.5f*(float)rand()/RAND_MAX + 0.55f;
-            lights[i].Angle0    = FLOAT_2PI*((float)rand()/RAND_MAX);
-            lights[i].Height0   = FLOAT_2PI*(float)rand()/RAND_MAX;
-            lights[i].Speed0    = 4.0f*(float)rand()/RAND_MAX - 2.0f;
-            lights[i].Animation = (Light::AnimMode)(Light::ANIM_BOUNCE + (rand()%3));
-            lights[i].Radius    = (float)rand()/RAND_MAX+0.05f;
-            lights[i].Color[0]  = (float)rand()/RAND_MAX;
-            lights[i].Color[1]  = (float)rand()/RAND_MAX;
+            lights[i].Dist0     = 0.5f*(float)std::rand()/RAND_MAX + 0.55f;
+            lights[i].Angle0    = FLOAT_2PI*((float)std::rand()/RAND_MAX);
+            lights[i].Height0   = FLOAT_2PI*(float)std::rand()/RAND_MAX;
+            lights[i].Speed0    = 4.0f*(float)std::rand()/RAND_MAX - 2.0f;
+            lights[i].Animation = (Light::AnimMode)(Light::ANIM_BOUNCE + (std::rand()%3));
+            lights[i].Radius    = (float)std::rand()/RAND_MAX+0.05f;
+            lights[i].Color[0]  = (float)std::rand()/RAND_MAX;
+            lights[i].Color[1]  = (float)std::rand()/RAND_MAX;
             lights[i].Color[2]  = (lights[i].Color[0]>lights[i].Color[1]) ? 1.0f-lights[i].Color[1] : 1.0f-lights[i].Color[0];
             lights[i].Color[3]  = 1;
             lights[i].Active    = true;
@@ -296,9 +298,9 @@ void Scene::Update(double time)
         else
             vertSpeed = 0;
 
-        lights[i].Pos[0] = lights[i].Dist0 * (float)cos(horizSpeed*time + lights[i].Angle0);
-        lights[i].Pos[1] = (float)fabs(cos(vertSpeed*time + lights[i].Height0));
-        lights[i].Pos[2] = lights[i].Dist0 * (float)sin(horizSpeed*time + lights[i].Angle0);
+        lights[i].Pos[0] = lights[i].Dist0 * (float)std::cos(horizSpeed*time + lights[i].Angle0);
+        lights[i].Pos[1] = (float)std::fabs(std::cos(vertSpeed*time + lights[i].Height0));
+        lights[i].Pos[2] = lights[i].Dist0 * (float)std::sin(horizSpeed*time + lights[i].Angle0);
         lights[i].Pos[3] = 1;
     }
 }
@@ -420,8 +422,8 @@ void Scene::DrawHalos(bool reflected) const
     if( reflected )
         glScalef(1, -1 ,1);
     float black[4] = {0, 0, 0, 1};
-    float cr = (float)cos(FLOAT_2PI*RotYAngle/360.0f);
-    float sr = (float)sin(FLOAT_2PI*RotYAngle/360.0f);
+    float cr = (float)std::cos(FLOAT_2PI*RotYAngle/360.0f);
+    float sr = (float)std::sin(FLOAT_2PI*RotYAngle/360.0f);
     for(int i=0; i<NumLights; ++i)
     {
         if( lights[i].Active )
@@ -477,10 +479,10 @@ void Scene::DrawSubdivCylinderY(float xCenter, float yBottom, float zCenter, flo
             r1 = radiusBottom + h1*(radiusTop-radiusBottom);
             a0 = FLOAT_2PI*(float)i/sideSubdiv;
             a1 = FLOAT_2PI*(float)(i+1)/sideSubdiv;
-            cosa0 = (float)cos(a0);
-            sina0 = (float)sin(a0);
-            cosa1 = (float)cos(a1);
-            sina1 = (float)sin(a1);
+            cosa0 = (float)std::cos(a0);
+            sina0 = (float)std::sin(a0);
+            cosa1 = (float)std::cos(a1);
+            sina1 = (float)std::sin(a1);
             glNormal3f(cosa0, 0, sina0);
             glVertex3f(xCenter+r0*cosa0, y0, zCenter+r0*sina0);
             glNormal3f(cosa0, 0, sina0);
@@ -503,7 +505,7 @@ void Scene::DrawSubdivHaloZ(float x, float y, float z, float radius, int subdiv)
     for( int i=0; i<=subdiv; ++i )
     {
         glColor4f(1, 1, 1, 0);
-        glVertex3f(x+radius*(float)cos(FLOAT_2PI*(float)i/subdiv), x+radius*(float)sin(FLOAT_2PI*(float)i/subdiv), z);
+        glVertex3f(x+radius*(float)std::cos(FLOAT_2PI*(float)i/subdiv), x+radius*(float)std::sin(FLOAT_2PI*(float)i/subdiv), z);
     }
     glEnd();
 }
@@ -606,7 +608,7 @@ int main()
     {
         // A fatal error occurred
         std::cerr << "GLFW initialization failed!" << std::endl;
-        exit(EXIT_FAILURE);
+        std::exit(1);
     }
 
     // Initialize AntTweakBar
@@ -614,7 +616,7 @@ int main()
     {
         // A fatal error occurred
         std::cerr << "AntTweakBar initialization failed!" << std::endl;
-        exit(EXIT_FAILURE);
+        std::exit(1);
     };
 
     // Create a window
@@ -626,7 +628,7 @@ int main()
     {
         std::cerr <<  "Can't open GLFW window!" << std::endl;
         glfwTerminate();
-        exit(EXIT_FAILURE);
+        std::exit(1);
     }
 
     glfwMakeContextCurrent(window);
@@ -730,5 +732,5 @@ int main()
     glfwTerminate();
 
     // Exit
-    exit(EXIT_SUCCESS);
+    std::exit(0);
 }

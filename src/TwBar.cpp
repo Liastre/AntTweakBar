@@ -8,13 +8,16 @@
 //  ---------------------------------------------------------------------------
 
 
-#include "TwPrecomp.h"
-#include <AntTweakBar.h>
-#include "TwMgr.h"
-#include "TwBar.h"
-#include "TwColors.h"
-  
-using namespace std;
+#include "TwPrecomp.hpp"
+#include <AntTweakBar.hpp>
+#include "TwMgr.hpp"
+#include "TwBar.hpp"
+#include "TwColors.hpp"
+
+#include <list>
+#include <cmath>
+#include <sstream>
+#include <cassert>
 
 extern const char *g_ErrNotFound;
 const char *g_ErrUnknownAttrib  = "Unknown parameter";
@@ -97,12 +100,12 @@ CTwVarAtom::~CTwVarAtom()
     {
         if( m_Val.m_Bool.m_FreeTrueString && m_Val.m_Bool.m_TrueString!=NULL )
         {
-            free(m_Val.m_Bool.m_TrueString);
+            delete(m_Val.m_Bool.m_TrueString);
             m_Val.m_Bool.m_TrueString = NULL;
         }
         if( m_Val.m_Bool.m_FreeFalseString && m_Val.m_Bool.m_FalseString!=NULL )
         {
-            free(m_Val.m_Bool.m_FalseString);
+            delete(m_Val.m_Bool.m_FalseString);
             m_Val.m_Bool.m_FalseString = NULL;
         }
     }
@@ -112,7 +115,7 @@ CTwVarAtom::~CTwVarAtom()
         const CTwMgr::CCDStdString *CDStdString = (const CTwMgr::CCDStdString *)m_ClientData;
         //if( &(*CDStdString->m_This)==CDStdString )
         //  g_TwMgr->m_CDStdStrings.erase(CDStdString->m_This);
-        for( list<CTwMgr::CCDStdString>::iterator it=g_TwMgr->m_CDStdStrings.begin(); it!=g_TwMgr->m_CDStdStrings.end(); ++it )
+        for( std::list<CTwMgr::CCDStdString>::iterator it=g_TwMgr->m_CDStdStrings.begin(); it!=g_TwMgr->m_CDStdStrings.end(); ++it )
             if( &(*it)==CDStdString )
             {
                 g_TwMgr->m_CDStdStrings.erase(it);
@@ -133,7 +136,7 @@ CTwVarAtom::~CTwVarAtom()
 
 //  ---------------------------------------------------------------------------
 
-void CTwVarAtom::ValueToString(string *_Str) const
+void CTwVarAtom::ValueToString(std::string *_Str) const
 {
     assert(_Str!=NULL);
     static const char *ErrStr = "unreachable";
@@ -473,7 +476,7 @@ void CTwVarAtom::ValueToString(string *_Str) const
             {
                 int n = TW_CSSTRING_SIZE(m_Type);
                 if( n+32>(int)g_TwMgr->m_CSStringBuffer.size() )
-                    g_TwMgr->m_CSStringBuffer.resize(n+32);
+                    g_TwMgr->m_CSStringBuffer.resize((uint32_t)n+32);
                 Val = &(g_TwMgr->m_CSStringBuffer[0]);
                 m_GetCallback(Val , m_ClientData);
                 Val[n] = '\0';
@@ -737,7 +740,7 @@ void CTwVarAtom::ValueFromDouble(double _Val)
         break;
     case TW_TYPE_BOOL8:
         {
-            char Val = (_Val!=0) ? 1 : 0;
+            char Val = (char)((_Val!=0) ? 1 : 0);
             if( UseSet )
                 m_SetCallback(&Val, m_ClientData);
             else
@@ -746,7 +749,7 @@ void CTwVarAtom::ValueFromDouble(double _Val)
         break;
     case TW_TYPE_BOOL16:
         {
-            short Val = (_Val!=0) ? 1 : 0;
+            short Val = (short)((_Val!=0) ? 1 : 0);
             if( UseSet )
                 m_SetCallback(&Val, m_ClientData);
             else
@@ -1316,7 +1319,7 @@ int CTwVarAtom::SetAttrib(int _AttribID, const char *_Value, TwBar *_Bar, struct
         if( (m_Type==TW_TYPE_BOOL8 || m_Type==TW_TYPE_BOOL16 || m_Type==TW_TYPE_BOOL32 || m_Type==TW_TYPE_BOOLCPP) && _Value!=NULL )
         {
             if( m_Val.m_Bool.m_FreeTrueString && m_Val.m_Bool.m_TrueString!=NULL )
-                free(m_Val.m_Bool.m_TrueString);
+                delete(m_Val.m_Bool.m_TrueString);
             m_Val.m_Bool.m_TrueString = _strdup(_Value);
             m_Val.m_Bool.m_FreeTrueString = true;
             return 1;
@@ -1327,7 +1330,7 @@ int CTwVarAtom::SetAttrib(int _AttribID, const char *_Value, TwBar *_Bar, struct
         if( (m_Type==TW_TYPE_BOOL8 || m_Type==TW_TYPE_BOOL16 || m_Type==TW_TYPE_BOOL32 || m_Type==TW_TYPE_BOOLCPP) && _Value!=NULL )
         {
             if( m_Val.m_Bool.m_FreeFalseString && m_Val.m_Bool.m_FalseString!=NULL )
-                free(m_Val.m_Bool.m_FalseString);
+                delete(m_Val.m_Bool.m_FalseString);
             m_Val.m_Bool.m_FalseString = _strdup(_Value);
             m_Val.m_Bool.m_FreeFalseString = true;
             return 1;
@@ -1401,7 +1404,7 @@ int CTwVarAtom::SetAttrib(int _AttribID, const char *_Value, TwBar *_Bar, struct
                 // set precision
                 if( _AttribID==VA_STEP && ((m_Type==TW_TYPE_FLOAT && m_Val.m_Float32.m_Precision<0) || (m_Type==TW_TYPE_DOUBLE && m_Val.m_Float64.m_Precision<0)) )
                 {
-                    double Step = fabs( (m_Type==TW_TYPE_FLOAT) ? m_Val.m_Float32.m_Step : m_Val.m_Float64.m_Step );
+                    double Step = (double)std::fabs( (m_Type==TW_TYPE_FLOAT) ? m_Val.m_Float32.m_Step : m_Val.m_Float64.m_Step );
                     signed char *Precision = (m_Type==TW_TYPE_FLOAT) ? &m_Val.m_Float32.m_Precision : &m_Val.m_Float64.m_Precision;
                     const double K_EPS = 1.0 - 1.0e-6;
                     if( Step>=1 )
@@ -1545,7 +1548,7 @@ int CTwVarAtom::SetAttrib(int _AttribID, const char *_Value, TwBar *_Bar, struct
                         if( i>0 )
                             v.second.assign(s, i);
                         //m_Val.m_Enum.m_Entries->insert(v);
-                        pair<CTwMgr::CEnum::CEntries::iterator, bool> ret;
+                        std::pair<CTwMgr::CEnum::CEntries::iterator, bool> ret;
                         ret = g_TwMgr->m_Enums[m_Type-TW_TYPE_ENUM_BASE].m_Entries.insert(v);
                         if( !ret.second ) // force overwrite if element already exists
                         {
@@ -1612,7 +1615,7 @@ int CTwVarAtom::SetAttrib(int _AttribID, const char *_Value, TwBar *_Bar, struct
                     int n = TW_CSSTRING_SIZE(m_Type);
                     if( n>0 )
                     {
-                        string str = _Value;
+                        std::string str = _Value;
                         if( (int)str.length()>n-1 )
                             str.resize(n-1);
                         if( m_SetCallback!=NULL )
@@ -1800,7 +1803,7 @@ ERetType CTwVarAtom::GetAttrib(int _AttribID, TwBar *_Bar, CTwVarGroup *_VarPare
         {
             if( m_Type==TW_TYPE_CDSTRING || m_Type==TW_TYPE_CDSTDSTRING || IsCSStringType(m_Type) )
             {
-                string str;
+                std::string str;
                 ValueToString(&str);
                 outString << str;
                 return RET_STRING;
@@ -1833,10 +1836,7 @@ void CTwVarAtom::Increment(int _Step)
                 v = *((char *)m_Ptr);
             else if( m_GetCallback!=NULL )
                 m_GetCallback(&v, m_ClientData);
-            if( v )
-                v = false;
-            else
-                v = true;
+            v = (v==0);
             if( m_Ptr!=NULL )
                 *((char *)m_Ptr) = v;
             else if( m_SetCallback!=NULL )
@@ -3937,7 +3937,7 @@ void CTwBar::UpdateColors()
 
 CTwVarGroup::~CTwVarGroup()
 {
-    for( vector<CTwVar*>::iterator it= m_Vars.begin(); it!=m_Vars.end(); ++it )
+    for( std::vector<CTwVar*>::iterator it= m_Vars.begin(); it!=m_Vars.end(); ++it )
         if( *it != NULL )
         {
             CTwVar *Var = *it;
@@ -3981,7 +3981,7 @@ void CTwBar::BrowseHierarchy(int *_CurrLine, int _CurrLevel, const CTwVar *_Var,
     {
         const CTwVarGroup *Grp = static_cast<const CTwVarGroup *>(_Var);
         if( Grp->m_Open )
-            for( vector<CTwVar*>::const_iterator it=Grp->m_Vars.begin(); it!=Grp->m_Vars.end(); ++it )
+            for( std::vector<CTwVar*>::const_iterator it=Grp->m_Vars.begin(); it!=Grp->m_Vars.end(); ++it )
                 if( (*it)->m_Visible )
                     BrowseHierarchy(_CurrLine, _CurrLevel+1, *it, _First, _Last);
         if( m_HierTags.size()>0 )
@@ -3991,17 +3991,17 @@ void CTwBar::BrowseHierarchy(int *_CurrLine, int _CurrLevel, const CTwVar *_Var,
 
 //  ---------------------------------------------------------------------------
 
-void CTwBar::ListLabels(vector<string>& _Labels, vector<color32>& _Colors, vector<color32>& _BgColors, bool *_HasBgColors, const CTexFont *_Font, int _AtomWidthMax, int _GroupWidthMax)
+void CTwBar::ListLabels(std::vector<std::string>& _Labels, std::vector<color32>& _Colors, std::vector<color32>& _BgColors, bool *_HasBgColors, const CTexFont *_Font, int _AtomWidthMax, int _GroupWidthMax)
 {
     const int NbEtc = 2;
-    string ValStr;
+    std::string ValStr;
     int Len, i, x, Etc, s;
     const unsigned char *Text;
     unsigned char ch;
     int WidthMax;
     
     int Space = _Font->m_CharWidth[(int)' '];
-    int LevelSpace = max(_Font->m_CharHeight-6, 4); // space used by DrawHierHandles
+    int LevelSpace = std::max(_Font->m_CharHeight-6, 4); // space used by DrawHierHandles
 
     int nh = (int)m_HierTags.size();
     for( int h=0; h<nh; ++h )
@@ -4028,7 +4028,7 @@ void CTwBar::ListLabels(vector<string>& _Labels, vector<color32>& _Colors, vecto
         bool IsCustom = m_HierTags[h].m_Var->IsCustom(); // !m_HierTags[h].m_Var->IsGroup() && (static_cast<const CTwVarAtom *>(m_HierTags[h].m_Var)->m_Type>=TW_TYPE_CUSTOM_BASE && static_cast<const CTwVarAtom *>(m_HierTags[h].m_Var)->m_Type<TW_TYPE_CUSTOM_BASE+(int)g_TwMgr->m_Customs.size());
         if( !IsCustom )
         {
-            string& CurrentLabel = _Labels[_Labels.size()-1];
+            std::string& CurrentLabel = _Labels[_Labels.size()-1];
             if( m_HierTags[h].m_Var->IsGroup() && static_cast<const CTwVarGroup *>(m_HierTags[h].m_Var)->m_SummaryCallback==NULL )
                 WidthMax = _GroupWidthMax;
             else if( !m_HierTags[h].m_Var->IsGroup() && static_cast<const CTwVarAtom *>(m_HierTags[h].m_Var)->m_Type==TW_TYPE_BUTTON )
@@ -4071,13 +4071,13 @@ void CTwBar::ListLabels(vector<string>& _Labels, vector<color32>& _Colors, vecto
 
 //  ---------------------------------------------------------------------------
 
-void CTwBar::ListValues(vector<string>& _Values, vector<color32>& _Colors, vector<color32>& _BgColors, const CTexFont *_Font, int _WidthMax)
+void CTwBar::ListValues(std::vector<std::string>& _Values, std::vector<color32>& _Colors, std::vector<color32>& _BgColors, const CTexFont *_Font, int _WidthMax)
 {
     CTwFPU fpu; // force fpu precision
 
     const int NbEtc = 2;
     const CTwVarAtom *Atom = NULL;
-    string ValStr;
+    std::string ValStr;
     int Len, i, x, Etc;
     const unsigned char *Text;
     unsigned char ch;
@@ -4087,8 +4087,8 @@ void CTwBar::ListValues(vector<string>& _Values, vector<color32>& _Colors, vecto
     bool IsROText;
     bool HasBgColor;
     bool AcceptEdit;
-    size_t SummaryMaxLength = max(_WidthMax/_Font->m_CharWidth[(int)'I'], 4);
-    static vector<char> Summary;
+    size_t SummaryMaxLength = (size_t)std::max(_WidthMax/_Font->m_CharWidth[(int)'I'], 4);
+    static std::vector<char> Summary;
     Summary.resize(SummaryMaxLength+32);
 
     int nh = (int)m_HierTags.size();
@@ -4180,7 +4180,7 @@ void CTwBar::ListValues(vector<string>& _Values, vector<color32>& _Colors, vecto
             else
                 _BgColors.push_back(m_ColValBg);
 
-            string& CurrentValue = _Values[_Values.size()-1];
+            std::string& CurrentValue = _Values[_Values.size()-1];
             int wmax = _WidthMax;
             if( m_HighlightedLine==h && m_DrawRotoBtn )
                 wmax -= 3*IncrBtnWidth(m_Font->m_CharHeight);
@@ -4221,7 +4221,7 @@ int CTwBar::ComputeLabelsWidth(const CTexFont *_Font)
     const unsigned char *Text;
     int LabelsWidth = 0;    
     int Space = _Font->m_CharWidth[(int)' '];
-    int LevelSpace = max(_Font->m_CharHeight-6, 4); // space used by DrawHierHandles
+    int LevelSpace = std::max(_Font->m_CharHeight-6, 4); // space used by DrawHierHandles
 
     int nh = (int)m_HierTags.size();
     for( int h=0; h<nh; ++h )
@@ -4257,7 +4257,7 @@ int CTwBar::ComputeValuesWidth(const CTexFont *_Font)
     CTwFPU fpu; // force fpu precision
 
     const CTwVarAtom *Atom = NULL;
-    string ValStr;
+    std::string ValStr;
     int Len, i, x;
     int Space = _Font->m_CharWidth[(int)' '];
     const unsigned char *Text;
@@ -4285,7 +4285,7 @@ int CTwBar::ComputeValuesWidth(const CTexFont *_Font)
 
 //  ---------------------------------------------------------------------------
 
-static int ClampText(string& _Text, const CTexFont *_Font, int _WidthMax)
+static int ClampText(std::string& _Text, const CTexFont *_Font, int _WidthMax)
 {
     int Len = (int)_Text.length();
     unsigned char ch;
@@ -4312,7 +4312,7 @@ static int ClampText(string& _Text, const CTexFont *_Font, int _WidthMax)
 
 void CTwBar::Update()
 {
-    assert(m_UpToDate==false);
+    assert(!m_UpToDate);
     assert(m_Font);
     ITwGraph *Gr = g_TwMgr->m_Graph;
 
@@ -4441,7 +4441,7 @@ void CTwBar::Update()
         int LineNum = 0;
         BrowseHierarchy(&LineNum, 0, &m_VarRoot, m_FirstLine, m_FirstLine+NbLines); // add a dummy tag at the end to avoid wrong 'tag-closing' problems
         if( (int)m_HierTags.size()>NbLines )
-            m_HierTags.resize(NbLines); // remove the last dummy tag
+            m_HierTags.resize((uint32_t)NbLines); // remove the last dummy tag
         m_NbHierLines = LineNum;
         m_NbDisplayedLines = (int)m_HierTags.size();
 
@@ -4451,7 +4451,7 @@ void CTwBar::Update()
             if( m_ValuesWidth<2*m_Font->m_CharHeight )
                 m_ValuesWidth = 2*m_Font->m_CharHeight; // enough to draw buttons
             if( m_ValuesWidth>m_VarX2 - m_VarX0 )
-                m_ValuesWidth = max(m_VarX2 - m_VarX0 - m_Font->m_CharHeight, 0);
+                m_ValuesWidth = std::max(m_VarX2 - m_VarX0 - m_Font->m_CharHeight, 0);
             m_VarX1 = m_VarX2 - m_ValuesWidth;
             if( m_VarX1<m_VarX0+32 )
                 m_VarX1 = m_VarX0+32;
@@ -4492,7 +4492,7 @@ void CTwBar::Update()
     m_ScrollY1 = y0+w+yscr+hscr;
 
     // Build title
-    string Title;
+    std::string Title;
     if( m_Label.size()>0 )
         Title = m_Label;
     else
@@ -4503,9 +4503,9 @@ void CTwBar::Update()
     if( !m_IsMinimized )
     {
         // Build labels
-        vector<string>  Labels;
-        vector<color32> Colors;
-        vector<color32> BgColors;
+        std::vector<std::string>  Labels;
+        std::vector<color32> Colors;
+        std::vector<color32> BgColors;
         bool HasBgColors = false;
         ListLabels(Labels, Colors, BgColors, &HasBgColors, m_Font, m_VarX1-m_VarX0, m_VarX2-m_VarX0);
         assert( Labels.size()==Colors.size() && Labels.size()==BgColors.size() );
@@ -4567,7 +4567,7 @@ void CTwBar::Update()
         */
 
         // Build values
-        vector<string>& Values = Labels;    // reuse
+        std::vector<std::string>& Values = Labels;    // reuse
         Values.resize(0);
         Colors.resize(0);
         BgColors.resize(0);
@@ -4579,7 +4579,7 @@ void CTwBar::Update()
             Gr->BuildText(m_ValuesTextObj, NULL, NULL, NULL, 0, m_Font, m_LineSep, m_VarX2-m_VarX1);
 
         // Build key shortcut text
-        string Shortcut;
+        std::string Shortcut;
         m_ShortcutLine = -1;
         if( m_HighlightedLine>=0 && m_HighlightedLine<(int)m_HierTags.size() && m_HierTags[m_HighlightedLine].m_Var!=NULL && !m_HierTags[m_HighlightedLine].m_Var->IsGroup() )
         {
@@ -4867,7 +4867,7 @@ void CTwBar::Draw(int _DrawPart)
     if( !m_IsMinimized )
     {
         int y = m_PosY+1;
-        int LevelSpace = max(m_Font->m_CharHeight-6, 4); // space used by DrawHierHandles
+        int LevelSpace = std::max(m_Font->m_CharHeight-6, 4); // space used by DrawHierHandles
 
         color32 colBg = m_ColBg, colBg1 = m_ColBg1, colBg2 = m_ColBg2;
         if( m_DrawHandles || m_IsPopupList )
@@ -5065,7 +5065,7 @@ void CTwBar::Draw(int _DrawPart)
                     }
                     else if( static_cast<CTwVarAtom *>(m_HierTags[h].m_Var)->m_Val.m_Button.m_Separator==1 )
                     {
-                        int LevelSpace = max(m_Font->m_CharHeight-6, 4); // space used by DrawHierHandles
+                        int LevelSpace = std::max(m_Font->m_CharHeight-6, 4); // space used by DrawHierHandles
                         Gr->DrawLine(m_PosX+m_VarX0+m_HierTags[h].m_Level*LevelSpace, yh+m_Font->m_CharHeight/2, m_PosX+m_VarX2, yh+m_Font->m_CharHeight/2, m_ColSeparator );
                     }
                 }
@@ -5095,12 +5095,12 @@ void CTwBar::Draw(int _DrawPart)
                         }
                         else
                         {
-                            it->second.m_IndexMin = min(it->second.m_IndexMin, mProxy->m_MemberIndex);
-                            it->second.m_IndexMax = min(it->second.m_IndexMax, mProxy->m_MemberIndex);
-                            it->second.m_XMin = min(it->second.m_XMin, xMin);
-                            it->second.m_XMax = max(it->second.m_XMax, xMax);
-                            it->second.m_YMin = min(it->second.m_YMin, yMin);
-                            it->second.m_YMax = max(it->second.m_YMax, yMax);
+                            it->second.m_IndexMin = std::min(it->second.m_IndexMin, mProxy->m_MemberIndex);
+                            it->second.m_IndexMax = std::min(it->second.m_IndexMax, mProxy->m_MemberIndex);
+                            it->second.m_XMin = std::min(it->second.m_XMin, xMin);
+                            it->second.m_XMax = std::max(it->second.m_XMax, xMax);
+                            it->second.m_YMin = std::min(it->second.m_YMin, yMin);
+                            it->second.m_YMax = std::max(it->second.m_YMax, yMax);
                             it->second.m_Y0 = 0;
                             it->second.m_Y1 = 0;
                             assert( it->second.m_Var==mProxy->m_VarParent );
@@ -5119,8 +5119,8 @@ void CTwBar::Draw(int _DrawPart)
                 CCustomRecord& r = it->second;
                 if( sProxy->m_CustomDrawCallback!=NULL )
                 {
-                    int y0 = r.m_YMin - max(r.m_IndexMin - sProxy->m_CustomIndexFirst, 0)*(m_Font->m_CharHeight + m_LineSep);
-                    int y1 = y0 + max(sProxy->m_CustomIndexLast - sProxy->m_CustomIndexFirst + 1, 0)*(m_Font->m_CharHeight + m_LineSep) - 2;
+                    int y0 = r.m_YMin - std::max(r.m_IndexMin - sProxy->m_CustomIndexFirst, 0)*(m_Font->m_CharHeight + m_LineSep);
+                    int y1 = y0 + std::max(sProxy->m_CustomIndexLast - sProxy->m_CustomIndexFirst + 1, 0)*(m_Font->m_CharHeight + m_LineSep) - 2;
                     if( y0<y1 )
                     {
                         r.m_Y0 = y0;
@@ -5151,16 +5151,6 @@ void CTwBar::Draw(int _DrawPart)
                             IsMax = (v>=vmax);
                             IsMin = (v<=vmin);
                         }
-
-                        /*
-                        Gr->DrawRect(m_PosX+m_VarX2-2*bw+1, y0+1, m_PosX+m_VarX2-bw-1, y0+m_Font->m_CharHeight-2, (m_HighlightDecrBtn && !IsMin)?m_ColHighBtn:m_ColBtn);
-                        Gr->DrawRect(m_PosX+m_VarX2-bw+1, y0+1, m_PosX+m_VarX2-1, y0+m_Font->m_CharHeight-2, (m_HighlightIncrBtn && !IsMax)?m_ColHighBtn:m_ColBtn);
-                        // [-]
-                        Gr->DrawLine(m_PosX+m_VarX2-2*bw+3+(bw>8?1:0), y0+m_Font->m_CharHeight/2, m_PosX+m_VarX2-bw-2-(bw>8?1:0), y0+m_Font->m_CharHeight/2, IsMin?m_ColValTextRO:m_ColTitleText);
-                        // [+]
-                        Gr->DrawLine(m_PosX+m_VarX2-bw+3, y0+m_Font->m_CharHeight/2, m_PosX+m_VarX2-2, y0+m_Font->m_CharHeight/2, IsMax?m_ColValTextRO:m_ColTitleText);
-                        Gr->DrawLine(m_PosX+m_VarX2-bw/2, y0+m_Font->m_CharHeight/2-bw/2+2, m_PosX+m_VarX2-bw/2, y0+m_Font->m_CharHeight/2+bw/2-1, IsMax?m_ColValTextRO:m_ColTitleText);
-                        */
                         Gr->DrawRect(m_PosX+m_VarX2-3*bw+1, y0+1, m_PosX+m_VarX2-2*bw-1, y0+m_Font->m_CharHeight-2, (m_HighlightDecrBtn && !IsMin)?m_ColHighBtn:m_ColBtn);
                         Gr->DrawRect(m_PosX+m_VarX2-2*bw+1, y0+1, m_PosX+m_VarX2-bw-1, y0+m_Font->m_CharHeight-2, (m_HighlightIncrBtn && !IsMax)?m_ColHighBtn:m_ColBtn);
                         // [-]
@@ -5268,7 +5258,7 @@ void CTwBar::Draw(int _DrawPart)
                 {
                     if( g_TwMgr->m_KeyPressedBuildText )
                     {
-                        string Str = g_TwMgr->m_KeyPressedStr;
+                        std::string Str = g_TwMgr->m_KeyPressedStr;
                         ClampText(Str, m_Font, m_Width-2*m_Font->m_CharHeight);
                         g_TwMgr->m_Graph->BuildText(g_TwMgr->m_KeyPressedTextObj, &Str, NULL, NULL, 1, g_TwMgr->m_HelpBar->m_Font, 0, 0);
                         g_TwMgr->m_KeyPressedBuildText = false;
@@ -5285,7 +5275,7 @@ void CTwBar::Draw(int _DrawPart)
                 {
                     if( g_TwMgr->m_InfoBuildText )
                     {
-                        string Info = "atb ";
+                        std::string Info = "atb ";
                         char Ver[64];
                         sprintf(Ver, " %d.%02d", TW_VERSION/100, TW_VERSION%100);
                         Info += Ver;
@@ -5325,12 +5315,12 @@ void CTwBar::Draw(int _DrawPart)
         vph = g_TwMgr->m_WndHeight;
         if( g_TwMgr->m_IconMarginX>0 )
         {
-            vpx = min(g_TwMgr->m_IconMarginX, vpw/3);
+            vpx = std::min(g_TwMgr->m_IconMarginX, vpw/3);
             vpw -= 2 * vpx;
         }
         if( g_TwMgr->m_IconMarginY>0 )
         {
-            vpy = min(g_TwMgr->m_IconMarginY, vph/3);
+            vpy = std::min(g_TwMgr->m_IconMarginY, vph/3);
             vph -= 2 * vpy;
         }
 
@@ -5339,7 +5329,7 @@ void CTwBar::Draw(int _DrawPart)
         {
             if( g_TwMgr->m_IconAlign==1 )   // horizontal
             {
-                int n = max(1, vpw/m_Font->m_CharHeight-1);
+                int n = std::max(1, vpw/m_Font->m_CharHeight-1);
                 m_MinPosX = vpx + vpw-((m_MinNumber%n)+1)*m_Font->m_CharHeight;
                 m_MinPosY = vpy + (m_MinNumber/n)*m_Font->m_CharHeight;
                 MinYOffset = m_Font->m_CharHeight;
@@ -5347,7 +5337,7 @@ void CTwBar::Draw(int _DrawPart)
             }
             else // vertical
             {
-                int n = max(1, vph/m_Font->m_CharHeight-1);
+                int n = std::max(1, vph/m_Font->m_CharHeight-1);
                 m_MinPosY = vpy + (m_MinNumber%n)*m_Font->m_CharHeight;
                 m_MinPosX = vpx + vpw-((m_MinNumber/n)+1)*m_Font->m_CharHeight;
                 MinXOffset = -m_TitleWidth-m_Font->m_CharHeight;
@@ -5357,14 +5347,14 @@ void CTwBar::Draw(int _DrawPart)
         {
             if( g_TwMgr->m_IconAlign==1 )   // horizontal
             {
-                int n = max(1, vpw/m_Font->m_CharHeight-1);
+                int n = std::max(1, vpw/m_Font->m_CharHeight-1);
                 m_MinPosX = vpx + (m_MinNumber%n)*m_Font->m_CharHeight;
                 m_MinPosY = vpy + (m_MinNumber/n)*m_Font->m_CharHeight;
                 MinYOffset = m_Font->m_CharHeight;
             }
             else // vertical
             {
-                int n = max(1, vph/m_Font->m_CharHeight-1);
+                int n = std::max(1, vph/m_Font->m_CharHeight-1);
                 m_MinPosY = vpy + (m_MinNumber%n)*m_Font->m_CharHeight;
                 m_MinPosX = vpx + (m_MinNumber/n)*m_Font->m_CharHeight;
                 MinXOffset = m_Font->m_CharHeight;
@@ -5374,7 +5364,7 @@ void CTwBar::Draw(int _DrawPart)
         {
             if( g_TwMgr->m_IconAlign==1 )   // horizontal
             {
-                int n = max(1, vpw/m_Font->m_CharHeight-1);
+                int n = std::max(1, vpw/m_Font->m_CharHeight-1);
                 m_MinPosX = vpx + vpw-((m_MinNumber%n)+1)*m_Font->m_CharHeight;
                 m_MinPosY = vpy + vph-((m_MinNumber/n)+1)*m_Font->m_CharHeight;
                 MinYOffset = -m_Font->m_CharHeight;
@@ -5382,7 +5372,7 @@ void CTwBar::Draw(int _DrawPart)
             }
             else // vertical
             {
-                int n = max(1, vph/m_Font->m_CharHeight-1);
+                int n = std::max(1, vph/m_Font->m_CharHeight-1);
                 m_MinPosY = vpy + vph-((m_MinNumber%n)+1)*m_Font->m_CharHeight;
                 m_MinPosX = vpx + vpw-((m_MinNumber/n)+1)*m_Font->m_CharHeight;
                 MinXOffset = -m_TitleWidth-m_Font->m_CharHeight;
@@ -5392,14 +5382,14 @@ void CTwBar::Draw(int _DrawPart)
         {
             if( g_TwMgr->m_IconAlign==1 )   // horizontal
             {
-                int n = max(1, vpw/m_Font->m_CharHeight-1);
+                int n = std::max(1, vpw/m_Font->m_CharHeight-1);
                 m_MinPosX = vpx + (m_MinNumber%n)*m_Font->m_CharHeight;
                 m_MinPosY = vpy + vph-((m_MinNumber/n)+1)*m_Font->m_CharHeight;
                 MinYOffset = -m_Font->m_CharHeight;
             }
             else // vertical
             {
-                int n = max(1, vph/m_Font->m_CharHeight-1);
+                int n = std::max(1, vph/m_Font->m_CharHeight-1);
                 m_MinPosY = vpy + vph-((m_MinNumber%n)+1)*m_Font->m_CharHeight;
                 m_MinPosX = vpx + (m_MinNumber/n)*m_Font->m_CharHeight;
                 MinXOffset = m_Font->m_CharHeight;
@@ -5995,7 +5985,7 @@ bool CTwBar::MouseMotion(int _X, int _Y)
     if( g_TwMgr!=NULL && m_CustomActiveStructProxy!=NULL && m_CustomActiveStructProxy!=currentCustomActiveStructProxy )
     {
         bool found = false;
-        for( list<CTwMgr::CStructProxy>::iterator it=g_TwMgr->m_StructProxies.begin(); it!=g_TwMgr->m_StructProxies.end() && !found; ++it )
+        for( std::list<CTwMgr::CStructProxy>::iterator it=g_TwMgr->m_StructProxies.begin(); it!=g_TwMgr->m_StructProxies.end() && !found; ++it )
             found = (&(*it)==m_CustomActiveStructProxy);
         if( found && m_CustomActiveStructProxy->m_CustomMouseLeaveCallback!=NULL )
             m_CustomActiveStructProxy->m_CustomMouseLeaveCallback(m_CustomActiveStructProxy->m_StructExtData, m_CustomActiveStructProxy->m_StructClientData, this);
@@ -6135,7 +6125,7 @@ bool CTwBar::MouseButton(ETwMouseButtonID _Button, bool _Pressed, int _X, int _Y
                     if( g_TwMgr->m_PopupBar->m_PosY+popHeight+2 > g_TwMgr->m_WndHeight )
                         popHeight = g_TwMgr->m_WndHeight-g_TwMgr->m_PopupBar->m_PosY-2;
                     if( popHeight<popHeight0/2 && popHeight<g_TwMgr->m_WndHeight/2 )
-                        popHeight = min(popHeight0, g_TwMgr->m_WndHeight/2);
+                        popHeight = std::min(popHeight0, g_TwMgr->m_WndHeight/2);
                     if( popHeight<3*(m_Font->m_CharHeight+m_Sep) )
                         popHeight = 3*(m_Font->m_CharHeight+m_Sep);
                     g_TwMgr->m_PopupBar->m_Height = popHeight;
@@ -6384,7 +6374,7 @@ bool CTwBar::MouseButton(ETwMouseButtonID _Button, bool _Pressed, int _X, int _Y
             if( m_ValuesWidth<m_Font->m_CharHeight )
                 m_ValuesWidth = m_Font->m_CharHeight;
             if( m_ValuesWidth>m_VarX2 - m_VarX0 )
-                m_ValuesWidth = max(m_VarX2 - m_VarX0 - m_Font->m_CharHeight, 0);
+                m_ValuesWidth = std::max(m_VarX2 - m_VarX0 - m_Font->m_CharHeight, 0);
             NotUpToDate();
             ANT_SET_CURSOR(Arrow);
         }
@@ -6395,7 +6385,7 @@ bool CTwBar::MouseButton(ETwMouseButtonID _Button, bool _Pressed, int _X, int _Y
                 w = 2*m_Font->m_CharHeight; // enough to draw a button
             m_ValuesWidth = w;
             if( m_ValuesWidth>m_VarX2 - m_VarX0 )
-                m_ValuesWidth = max(m_VarX2 - m_VarX0 - m_Font->m_CharHeight, 0);
+                m_ValuesWidth = std::max(m_VarX2 - m_VarX0 - m_Font->m_CharHeight, 0);
             NotUpToDate();
             ANT_SET_CURSOR(Arrow);
         }
@@ -6980,7 +6970,7 @@ void DrawArc(int _X, int _Y, int _Radius, float _StartAngleDeg, float _EndAngleD
     float stepAngle = 4/(float)_Radius; // segment length = 4 pixels
     if( stepAngle>(float)M_PI/4 )
         stepAngle = (float)M_PI/4;
-    bool fullCircle = fabsf(endAngle-startAngle)>=2.0f*(float)M_PI+fabsf(stepAngle);
+    bool fullCircle = std::fabs(endAngle-startAngle)>=2.0f*(float)M_PI+std::fabs(stepAngle);
     int numSteps;
     if( fullCircle )
     {
@@ -6989,19 +6979,19 @@ void DrawArc(int _X, int _Y, int _Radius, float _StartAngleDeg, float _EndAngleD
         endAngle = 2.0f*(float)M_PI;
     }
     else
-        numSteps = int(fabsf(endAngle-startAngle)/stepAngle);
+        numSteps = int(std::fabs(endAngle-startAngle)/stepAngle);
     if( startAngle>endAngle )
         stepAngle = -stepAngle;
 
-    int x0 = int(_X + _Radius * cosf(startAngle) + 0.5f);
-    int y0 = int(_Y - _Radius * sinf(startAngle) + 0.5f);
+    int x0 = int(_X + _Radius * std::cos(startAngle) + 0.5f);
+    int y0 = int(_Y - _Radius * std::sin(startAngle) + 0.5f);
     int x1, y1;
     float angle = startAngle+stepAngle;
 
     for( int i=0; i<numSteps; ++i, angle+=stepAngle )
     {
-        x1 = int(_X + _Radius * cosf(angle) + 0.5f);
-        y1 = int(_Y - _Radius * sinf(angle) + 0.5f);
+        x1 = int(_X + _Radius * std::cos(angle) + 0.5f);
+        y1 = int(_Y - _Radius * std::sin(angle) + 0.5f);
         Gr->DrawLine(x0, y0, x1, y1, _Color, true);
         x0 = x1;
         y0 = y1;
@@ -7009,13 +6999,13 @@ void DrawArc(int _X, int _Y, int _Radius, float _StartAngleDeg, float _EndAngleD
 
     if( fullCircle )
     {
-        x1 = int(_X + _Radius * cosf(startAngle) + 0.5f);
-        y1 = int(_Y - _Radius * sinf(startAngle) + 0.5f);
+        x1 = int(_X + _Radius * std::cos(startAngle) + 0.5f);
+        y1 = int(_Y - _Radius * std::sin(startAngle) + 0.5f);
     }
     else
     {
-        x1 = int(_X + _Radius * cosf(endAngle) + 0.5f);
-        y1 = int(_Y - _Radius * sinf(endAngle) + 0.5f);
+        x1 = int(_X + _Radius * std::cos(endAngle) + 0.5f);
+        y1 = int(_Y - _Radius * std::sin(endAngle) + 0.5f);
     }
     Gr->DrawLine(x0, y0, x1, y1, _Color, true);
 }
@@ -7047,20 +7037,20 @@ void CTwBar::RotoDraw()
             double varMax = RotoGetMax();
             double varMin = RotoGetMin();
             double varStep = RotoGetStep();
-            if( varMax<DOUBLE_MAX && varMin>-DOUBLE_MAX && fabs(varStep)>DOUBLE_EPS && m_Roto.m_Subdiv>0 )
+            if( varMax<DOUBLE_MAX && varMin>-DOUBLE_MAX && std::fabs(varStep)>DOUBLE_EPS && m_Roto.m_Subdiv>0 )
             {
                 double dtMax = 360.0*(varMax-m_Roto.m_ValueAngle0)/((double)m_Roto.m_Subdiv*varStep);//+2;
                 double dtMin = 360.0*(varMin-m_Roto.m_ValueAngle0)/((double)m_Roto.m_Subdiv*varStep);//-2;
 
-                if( dtMax>=0 && dtMax<360 && dtMin<=0 && dtMin>-360 && fabs(dtMax-dtMin)<=360 )
+                if( dtMax>=0 && dtMax<360 && dtMin<=0 && dtMin>-360 && std::fabs(dtMax-dtMin)<=360 )
                 {
                     int x1, y1, x2, y2;
                     double da = 2.0*M_PI/m_Roto.m_Subdiv;
 
-                    x1 = m_Roto.m_Origin.x + (int)(40*cos(-M_PI*(m_Roto.m_Angle0+dtMax)/180-da));
-                    y1 = m_Roto.m_Origin.y + (int)(40*sin(-M_PI*(m_Roto.m_Angle0+dtMax)/180-da)+0.5);
-                    x2 = m_Roto.m_Origin.x + (int)(40*cos(-M_PI*(m_Roto.m_Angle0+dtMax-10)/180-da));
-                    y2 = m_Roto.m_Origin.y + (int)(40*sin(-M_PI*(m_Roto.m_Angle0+dtMax-10)/180-da)+0.5);
+                    x1 = m_Roto.m_Origin.x + (int)(40*std::cos(-M_PI*(m_Roto.m_Angle0+dtMax)/180-da));
+                    y1 = m_Roto.m_Origin.y + (int)(40*std::sin(-M_PI*(m_Roto.m_Angle0+dtMax)/180-da)+0.5);
+                    x2 = m_Roto.m_Origin.x + (int)(40*std::cos(-M_PI*(m_Roto.m_Angle0+dtMax-10)/180-da));
+                    y2 = m_Roto.m_Origin.y + (int)(40*std::sin(-M_PI*(m_Roto.m_Angle0+dtMax-10)/180-da)+0.5);
                     Gr->DrawLine(m_Roto.m_Origin.x, m_Roto.m_Origin.y, x1, y1, m_ColRotoBound, true);
                     Gr->DrawLine(m_Roto.m_Origin.x+1, m_Roto.m_Origin.y, x1+1, y1, m_ColRotoBound, true);
                     Gr->DrawLine(m_Roto.m_Origin.x, m_Roto.m_Origin.y+1, x1, y1+1, m_ColRotoBound, true);
@@ -7068,10 +7058,10 @@ void CTwBar::RotoDraw()
                     Gr->DrawLine(x1+1, y1, x2+1, y2, m_ColRotoBound, true);
                     Gr->DrawLine(x1, y1+1, x2, y2+1, m_ColRotoBound, true);
 
-                    x1 = m_Roto.m_Origin.x + (int)(40*cos(-M_PI*(m_Roto.m_Angle0+dtMin)/180+da));
-                    y1 = m_Roto.m_Origin.y + (int)(40*sin(-M_PI*(m_Roto.m_Angle0+dtMin)/180+da)+0.5);
-                    x2 = m_Roto.m_Origin.x + (int)(40*cos(-M_PI*(m_Roto.m_Angle0+dtMin+10)/180+da));
-                    y2 = m_Roto.m_Origin.y + (int)(40*sin(-M_PI*(m_Roto.m_Angle0+dtMin+10)/180+da)+0.5);
+                    x1 = m_Roto.m_Origin.x + (int)(40*std::cos(-M_PI*(m_Roto.m_Angle0+dtMin)/180+da));
+                    y1 = m_Roto.m_Origin.y + (int)(40*std::sin(-M_PI*(m_Roto.m_Angle0+dtMin)/180+da)+0.5);
+                    x2 = m_Roto.m_Origin.x + (int)(40*std::cos(-M_PI*(m_Roto.m_Angle0+dtMin+10)/180+da));
+                    y2 = m_Roto.m_Origin.y + (int)(40*std::sin(-M_PI*(m_Roto.m_Angle0+dtMin+10)/180+da)+0.5);
                     Gr->DrawLine(m_Roto.m_Origin.x, m_Roto.m_Origin.y, x1, y1, m_ColRotoBound, true);
                     Gr->DrawLine(m_Roto.m_Origin.x+1, m_Roto.m_Origin.y, x1+1, y1, m_ColRotoBound, true);
                     Gr->DrawLine(m_Roto.m_Origin.x, m_Roto.m_Origin.y+1, x1, y1+1, m_ColRotoBound, true);
@@ -7086,7 +7076,7 @@ void CTwBar::RotoDraw()
         Gr->DrawLine(m_Roto.m_Origin.x, m_Roto.m_Origin.y+1, m_Roto.m_Current.x, m_Roto.m_Current.y+1, m_ColRotoVal, true);
         Gr->DrawLine(m_Roto.m_Origin.x, m_Roto.m_Origin.y, m_Roto.m_Current.x, m_Roto.m_Current.y, m_ColRotoVal, true);
 
-        if( fabs(m_Roto.m_AngleDT)>=1 )
+        if( std::fabs(m_Roto.m_AngleDT)>=1 )
         {
             DrawArc(m_Roto.m_Origin.x, m_Roto.m_Origin.y, 32, float(m_Roto.m_Angle0), float(m_Roto.m_Angle0+m_Roto.m_AngleDT-1), m_ColRotoVal);
             DrawArc(m_Roto.m_Origin.x+1, m_Roto.m_Origin.y, 32, float(m_Roto.m_Angle0), float(m_Roto.m_Angle0+m_Roto.m_AngleDT-1), m_ColRotoVal);
@@ -7154,19 +7144,19 @@ void CTwBar::RotoOnMouseMove(int _X, int _Y)
 
         int ti = -1;
         double t = 0;
-        float r = sqrtf(float(  (m_Roto.m_Current.x-m_Roto.m_Origin.x)*(m_Roto.m_Current.x-m_Roto.m_Origin.x) 
+        float r = std::sqrt(float(  (m_Roto.m_Current.x-m_Roto.m_Origin.x)*(m_Roto.m_Current.x-m_Roto.m_Origin.x)
                               + (m_Roto.m_Current.y-m_Roto.m_Origin.y)*(m_Roto.m_Current.y-m_Roto.m_Origin.y)));
         if( r>m_RotoMinRadius )
         {
-            t = - atan2(double(m_Roto.m_Current.y-m_Roto.m_Origin.y), double(m_Roto.m_Current.x-m_Roto.m_Origin.x));
+            t = - std::atan2(double(m_Roto.m_Current.y-m_Roto.m_Origin.y), double(m_Roto.m_Current.x-m_Roto.m_Origin.x));
             ti = (int((t/(2.0*M_PI)+1.0)*NB_ROTO_CURSORS+0.5)) % NB_ROTO_CURSORS;
             if( m_Roto.m_HasPrevious )
             {
                 CPoint v0 = m_Roto.m_Previous-m_Roto.m_Origin;
                 CPoint v1 = m_Roto.m_Current-m_Roto.m_Origin;
-                double l0 = sqrt(double(v0.x*v0.x+v0.y*v0.y));
-                double l1 = sqrt(double(v1.x*v1.x+v1.y*v1.y));
-                double dt = acos(max(-1+1.0e-30,min(1-1.0e-30,double(v0.x*v1.x+v0.y*v1.y)/(l0*l1))));
+                double l0 = std::sqrt(double(v0.x*v0.x+v0.y*v0.y));
+                double l1 = std::sqrt(double(v1.x*v1.x+v1.y*v1.y));
+                double dt = std::acos(std::max(-1+1.0e-30,std::min(1-1.0e-30,double(v0.x*v1.x+v0.y*v1.y)/(l0*l1))));
                 if( v0.x*v1.y-v0.y*v1.x>0 )
                     dt = - dt;
                 double preciseInc = double(m_Roto.m_Subdiv) * dt/(2.0*M_PI) * RotoGetStep();
@@ -7259,9 +7249,9 @@ void CTwBar::RotoOnLButtonDown(int _X, int _Y)
         // re-adjust m_Subdiv if needed:
         double min=-DOUBLE_MAX, max=DOUBLE_MAX, step=1;
         m_Roto.m_Var->MinMaxStepToDouble(&min, &max, &step);
-        if( fabs(step)>0 && min>-DOUBLE_MAX && max<DOUBLE_MAX )
+        if( std::fabs(step)>0 && min>-DOUBLE_MAX && max<DOUBLE_MAX )
         {
-            double dsubdiv = fabs(max-min)/fabs(step)+0.5;
+            double dsubdiv = std::fabs(max-min)/std::fabs(step)+0.5;
             if( dsubdiv<m_RotoNbSubdiv/3 )
                 m_Roto.m_Subdiv = 3*(int)dsubdiv;
         }
@@ -7351,12 +7341,12 @@ void CTwBar::EditInPlaceDraw()
     if( m_EditInPlace.m_FirstChar>m_EditInPlace.m_CaretPos )
         m_EditInPlace.m_FirstChar = m_EditInPlace.m_CaretPos;
     int SubstrWidth = 0;
-    for( i=min(m_EditInPlace.m_CaretPos, StringLen-1); i>=0 && SubstrWidth<m_EditInPlace.m_Width; --i )
+    for( i=std::min(m_EditInPlace.m_CaretPos, StringLen-1); i>=0 && SubstrWidth<m_EditInPlace.m_Width; --i )
     {
-        unsigned char u = m_EditInPlace.m_String.c_str()[i];
+        unsigned char u = (unsigned char)m_EditInPlace.m_String.c_str()[i];
         SubstrWidth += m_Font->m_CharWidth[u];
     }
-    int FirstChar = max(0, i);
+    int FirstChar = std::max(0, i);
     if( SubstrWidth>=m_EditInPlace.m_Width )
         FirstChar += 2;
     if( m_EditInPlace.m_FirstChar<FirstChar && FirstChar<StringLen )
@@ -7366,19 +7356,19 @@ void CTwBar::EditInPlaceDraw()
     SubstrWidth = 0;
     for( i=m_EditInPlace.m_FirstChar; i<StringLen && SubstrWidth<m_EditInPlace.m_Width; ++i )
     {
-        unsigned char u = m_EditInPlace.m_String.c_str()[i];
+        unsigned char u = (unsigned char)m_EditInPlace.m_String.c_str()[i];
         SubstrWidth += m_Font->m_CharWidth[u];
     }
     int LastChar = i;
     if( SubstrWidth>=m_EditInPlace.m_Width )
         --LastChar;
-    string Substr = m_EditInPlace.m_String.substr( m_EditInPlace.m_FirstChar, LastChar-m_EditInPlace.m_FirstChar );
+    std::string Substr = m_EditInPlace.m_String.substr( m_EditInPlace.m_FirstChar, LastChar-m_EditInPlace.m_FirstChar );
 
     // compute caret x pos
     int CaretX = m_PosX + m_EditInPlace.m_X;
     for( i=m_EditInPlace.m_FirstChar; i<m_EditInPlace.m_CaretPos && i<StringLen; ++i )
     {
-        unsigned char u = m_EditInPlace.m_String.c_str()[i];
+        unsigned char u = (unsigned char)m_EditInPlace.m_String.c_str()[i];
         CaretX += m_Font->m_CharWidth[u];
     }
 
@@ -7389,23 +7379,23 @@ void CTwBar::EditInPlaceDraw()
     g_TwMgr->m_Graph->DrawText(m_EditInPlace.m_EditTextObj, m_PosX+m_EditInPlace.m_X, m_PosY+m_EditInPlace.m_Y, ColText, ColBg);
 
     // draw selected text
-    string StrSelected = "";
+    std::string StrSelected = "";
     if( m_EditInPlace.m_CaretPos>m_EditInPlace.m_SelectionStart )
     {
-        int FirstSel = max(m_EditInPlace.m_SelectionStart, m_EditInPlace.m_FirstChar);
-        int LastSel = min(m_EditInPlace.m_CaretPos, LastChar);
+        int FirstSel = std::max(m_EditInPlace.m_SelectionStart, m_EditInPlace.m_FirstChar);
+        int LastSel = std::min(m_EditInPlace.m_CaretPos, LastChar);
         StrSelected = m_EditInPlace.m_String.substr( FirstSel, LastSel-FirstSel );
     }
     else
     {
-        int FirstSel = max(m_EditInPlace.m_CaretPos, m_EditInPlace.m_FirstChar);
-        int LastSel = min(m_EditInPlace.m_SelectionStart, LastChar);
+        int FirstSel = std::max(m_EditInPlace.m_CaretPos, m_EditInPlace.m_FirstChar);
+        int LastSel = std::min(m_EditInPlace.m_SelectionStart, LastChar);
         StrSelected = m_EditInPlace.m_String.substr( FirstSel, LastSel-FirstSel );
     }
     int SelWidth = 0;
     for( i=0; i<(int)StrSelected.length(); ++i )
     {
-        unsigned char u = StrSelected.c_str()[i];
+        unsigned char u = (unsigned char)StrSelected.c_str()[i];
         SelWidth += m_Font->m_CharWidth[u];
     }
     if( SelWidth>0 && StrSelected.length()>0 )
@@ -7483,7 +7473,7 @@ void CTwBar::EditInPlaceEnd(bool _Commit)
                 m_EditInPlace.m_Var->m_SetCallback(&(m_EditInPlace.m_String), m_EditInPlace.m_Var->m_ClientData);
             else
             {
-                string *StringPtr = (string *)m_EditInPlace.m_Var->m_Ptr;
+                std::string *StringPtr = (std::string *)m_EditInPlace.m_Var->m_Ptr;
                 if( StringPtr!=NULL && g_TwMgr->m_CopyStdStringToClient!=NULL )
                     g_TwMgr->m_CopyStdStringToClient(*StringPtr, m_EditInPlace.m_String);
             }
@@ -7560,7 +7550,7 @@ editInPlaceStep(bool stepDirection)
                 m_EditInPlace.m_Var->m_SetCallback(&(m_EditInPlace.m_String), m_EditInPlace.m_Var->m_ClientData);
             else
             {
-                string *StringPtr = (string *)m_EditInPlace.m_Var->m_Ptr;
+                std::string *StringPtr = (std::string *)m_EditInPlace.m_Var->m_Ptr;
                 if( StringPtr!=NULL && g_TwMgr->m_CopyStdStringToClient!=NULL )
                     g_TwMgr->m_CopyStdStringToClient(*StringPtr, m_EditInPlace.m_String);
             }
@@ -7633,25 +7623,25 @@ bool CTwBar::EditInPlaceKeyPressed(int _Key, int _Modifiers)
         break;
     case TW_KEY_LEFT:
         if( _Modifiers==TW_KMOD_SHIFT )
-            m_EditInPlace.m_CaretPos = max(0, m_EditInPlace.m_CaretPos-1);
+            m_EditInPlace.m_CaretPos = std::max(0, m_EditInPlace.m_CaretPos-1);
         else
         {
             if( m_EditInPlace.m_SelectionStart!=m_EditInPlace.m_CaretPos )
-                m_EditInPlace.m_CaretPos = min(m_EditInPlace.m_SelectionStart, m_EditInPlace.m_CaretPos);
+                m_EditInPlace.m_CaretPos = std::min(m_EditInPlace.m_SelectionStart, m_EditInPlace.m_CaretPos);
             else
-                m_EditInPlace.m_CaretPos = max(0, m_EditInPlace.m_CaretPos-1);
+                m_EditInPlace.m_CaretPos = std::max(0, m_EditInPlace.m_CaretPos-1);
             m_EditInPlace.m_SelectionStart = m_EditInPlace.m_CaretPos;
         }
         break;
     case TW_KEY_RIGHT:
         if( _Modifiers==TW_KMOD_SHIFT )
-            m_EditInPlace.m_CaretPos = min((int)m_EditInPlace.m_String.length(), m_EditInPlace.m_CaretPos+1);
+            m_EditInPlace.m_CaretPos = std::min((int)m_EditInPlace.m_String.length(), m_EditInPlace.m_CaretPos+1);
         else
         {
             if( m_EditInPlace.m_SelectionStart!=m_EditInPlace.m_CaretPos )
-                m_EditInPlace.m_CaretPos = max(m_EditInPlace.m_SelectionStart, m_EditInPlace.m_CaretPos);
+                m_EditInPlace.m_CaretPos = std::max(m_EditInPlace.m_SelectionStart, m_EditInPlace.m_CaretPos);
             else
-                m_EditInPlace.m_CaretPos = min((int)m_EditInPlace.m_String.length(), m_EditInPlace.m_CaretPos+1);
+                m_EditInPlace.m_CaretPos = std::min((int)m_EditInPlace.m_String.length(), m_EditInPlace.m_CaretPos+1);
             m_EditInPlace.m_SelectionStart = m_EditInPlace.m_CaretPos;
         }
         break;
@@ -7659,7 +7649,7 @@ bool CTwBar::EditInPlaceKeyPressed(int _Key, int _Modifiers)
         if( !EditInPlaceIsReadOnly() )
         {
             if( m_EditInPlace.m_SelectionStart==m_EditInPlace.m_CaretPos )
-                m_EditInPlace.m_SelectionStart = max(0, m_EditInPlace.m_CaretPos-1);
+                m_EditInPlace.m_SelectionStart = std::max(0, m_EditInPlace.m_CaretPos-1);
             EditInPlaceEraseSelect();
         }
         break;
@@ -7667,7 +7657,7 @@ bool CTwBar::EditInPlaceKeyPressed(int _Key, int _Modifiers)
         if( !EditInPlaceIsReadOnly() )
         {
             if( m_EditInPlace.m_SelectionStart==m_EditInPlace.m_CaretPos )
-                m_EditInPlace.m_SelectionStart = min(m_EditInPlace.m_CaretPos+1, (int)m_EditInPlace.m_String.length());
+                m_EditInPlace.m_SelectionStart = std::min(m_EditInPlace.m_CaretPos+1, (int)m_EditInPlace.m_String.length());
             EditInPlaceEraseSelect();
         }
         break;
@@ -7701,7 +7691,7 @@ bool CTwBar::EditInPlaceKeyPressed(int _Key, int _Modifiers)
             {
                 if( m_EditInPlace.m_SelectionStart!=m_EditInPlace.m_CaretPos )
                     EditInPlaceEraseSelect();
-                string Str(1, (char)_Key);
+                std::string Str(1, (char)_Key);
                 m_EditInPlace.m_String.insert(m_EditInPlace.m_CaretPos, Str);
                 ++m_EditInPlace.m_CaretPos;
                 m_EditInPlace.m_SelectionStart = m_EditInPlace.m_CaretPos;
@@ -7713,7 +7703,7 @@ bool CTwBar::EditInPlaceKeyPressed(int _Key, int _Modifiers)
     {
         if( m_EditInPlace.m_SelectionStart!=m_EditInPlace.m_CaretPos )
             EditInPlaceEraseSelect();
-        string Str = "";
+        std::string Str = "";
         if( EditInPlaceGetClipboard(&Str) && Str.length()>0 )
         {
             m_EditInPlace.m_String.insert(m_EditInPlace.m_CaretPos, Str);
@@ -7723,7 +7713,7 @@ bool CTwBar::EditInPlaceKeyPressed(int _Key, int _Modifiers)
     }
     if( DoCopy )
     {
-        string Str = "";
+        std::string Str = "";
         if( m_EditInPlace.m_CaretPos>m_EditInPlace.m_SelectionStart )
             Str = m_EditInPlace.m_String.substr(m_EditInPlace.m_SelectionStart, m_EditInPlace.m_CaretPos-m_EditInPlace.m_SelectionStart);
         else if( m_EditInPlace.m_CaretPos<m_EditInPlace.m_SelectionStart )
@@ -7740,8 +7730,8 @@ bool CTwBar::EditInPlaceEraseSelect()
     assert(m_EditInPlace.m_Active);
     if( !EditInPlaceIsReadOnly() && m_EditInPlace.m_SelectionStart!=m_EditInPlace.m_CaretPos )
     {
-        int PosMin = min( m_EditInPlace.m_CaretPos, m_EditInPlace.m_SelectionStart );
-        m_EditInPlace.m_String.erase( PosMin, abs(m_EditInPlace.m_CaretPos - m_EditInPlace.m_SelectionStart) );
+        uint32_t PosMin = (uint32_t)std::min( m_EditInPlace.m_CaretPos, m_EditInPlace.m_SelectionStart );
+        m_EditInPlace.m_String.erase( PosMin, (uint32_t)abs(m_EditInPlace.m_CaretPos - m_EditInPlace.m_SelectionStart) );
         m_EditInPlace.m_SelectionStart = m_EditInPlace.m_CaretPos = PosMin;
         if( m_EditInPlace.m_FirstChar>PosMin )
             m_EditInPlace.m_FirstChar = PosMin;
@@ -7767,7 +7757,7 @@ bool CTwBar::EditInPlaceMouseMove(int _X, int _Y, bool _Select)
         CaretX += CharWidth;
     }
     if( CaretX>=m_PosX+m_EditInPlace.m_X+m_EditInPlace.m_Width )
-        i = max(0, i-1);
+        i = std::max(0, i-1);
 
     m_EditInPlace.m_CaretPos = i;
     if( !_Select )

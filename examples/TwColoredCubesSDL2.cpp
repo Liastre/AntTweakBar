@@ -11,11 +11,12 @@
 //
 //  ---------------------------------------------------------------------------
 
+#define ANTTWEAKBAR_USE_OPENGL
 #define ANTTWEAKBAR_USE_SDL2
-#include <AntTweakBar.h>
+#include <AntTweakBar.hpp>
 
-#include <stdio.h>
-#include <math.h>
+#include <cmath>
+#include <cstdlib>
 
 void onExit()
 {
@@ -139,7 +140,7 @@ int main(int argc, char *argv[])
             // Set cube position
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
-            glTranslated(0.6*cos(ka*t), 0.6*cos(kb*t), 0.6*sin(kc*t));
+            glTranslated(0.6*std::cos(ka*t), 0.6*std::cos(kb*t), 0.6*std::sin(kc*t));
             glRotated(r, 0.2, 0.7, 0.2);
             glScaled(0.1, 0.1, 0.1);
             glTranslated(-0.5, -0.5, -0.5);
