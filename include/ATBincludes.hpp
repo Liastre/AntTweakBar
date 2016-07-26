@@ -10,12 +10,13 @@
 #ifndef ANTTWEAKBAR_ATBINCLUDES_HPP
 #define ANTTWEAKBAR_ATBINCLUDES_HPP
 
+#include "ATBprecomp.hpp"
+
+
 #if defined(ANTTWEAKBAR_USE_OPENGL)
-// OS specified includes start
-#   if defined(_WIN32) || defined(_WIN64)
-#       include <windows.h>
-#   endif
-//  OS specified includes end
+// TODO: if OSx
+
+// TODO: if anything else
 #   include <GL/gl.h>
 #   include <GL/glu.h>
 #endif

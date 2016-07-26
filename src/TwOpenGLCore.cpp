@@ -18,7 +18,7 @@
 #   include <OpenGL/gl3.h>
 #   define ANT_OGL_HEADER_INCLUDED
 #endif
-#include "TwPrecomp.hpp"
+#include "ATBprecomp.hpp"
 #include "LoadOGLCore.hpp"
 #include "TwOpenGLCore.hpp"
 #include "TwMgr.hpp"

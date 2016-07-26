@@ -7,8 +7,6 @@
 //
 //  ---------------------------------------------------------------------------
 
-
-#include "TwPrecomp.hpp"
 #include <AntTweakBar.hpp>
 #include "TwMgr.hpp"
 #include "TwBar.hpp"
@@ -34,10 +32,6 @@
 #       include <crtdbg.h>
 #   endif // _DEBUG
 #endif // ANT_WINDOWS
-
-#if !defined(ANT_WINDOWS)
-#   define _snprintf snprintf
-#endif  // defined(ANT_WINDOWS)
 
 
 using namespace std;
@@ -1615,7 +1609,6 @@ bool CQuaternionExt::MouseButtonCB(TwMouseButtonID button, bool pressed, int mou
             ext->m_Rotating = false;
     }
 
-    //printf("Click %x\n", structExtValue);
     return true;
 }
 
@@ -1761,7 +1754,7 @@ static int TwCreateGraph(ETwGraphAPI _GraphAPI)
     case TW_OPENGL_CORE:
         g_TwMgr->m_Graph = new CTwGraphOpenGLCore;
         break;
-    //TODO: place celect into CMake options
+    // TODO: place select into CMake options
     /*case TW_DIRECT3D9:
         #ifdef ANT_WINDOWS
             if( g_TwMgr->m_Device!=NULL )
@@ -1909,7 +1902,7 @@ static int TwInitMgr()
 }
 
 
-int ANT_CALL TwInit(ETwGraphAPI _GraphAPI, void *_Device)
+TW_API int TwInit(ETwGraphAPI _GraphAPI, void *_Device)
 {
 #if defined(_DEBUG) && defined(ANT_WINDOWS)
     _CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF|_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF));
@@ -5575,17 +5568,17 @@ static int TwMouseEvent(ETwMouseAction _EventType, TwMouseButtonID _Button, int 
     return Handled ? 1 : 0;
 }
 
-int ANT_CALL TwMouseButton(ETwMouseAction _EventType, TwMouseButtonID _Button)
+int TwMouseButton(ETwMouseAction _EventType, TwMouseButtonID _Button)
 {
     return TwMouseEvent(_EventType, _Button, TW_MOUSE_NOMOTION, TW_MOUSE_NOMOTION, 0);
 }
 
-int ANT_CALL TwMouseMotion(int _MouseX, int _MouseY)
+int TwMouseMotion(int _MouseX, int _MouseY)
 {
     return TwMouseEvent(TW_MOUSE_MOTION, TW_MOUSE_NA, _MouseX, _MouseY, 0);
 }
 
-int ANT_CALL TwMouseWheel(int _Pos)
+int TwMouseWheel(int _Pos)
 {
     return TwMouseEvent(TW_MOUSE_WHEEL, TW_MOUSE_NA, TW_MOUSE_NOMOTION, TW_MOUSE_NOMOTION, _Pos);
 }
@@ -6264,58 +6257,58 @@ void CTwMgr::UpdateHelpBar()
 
 //  ---------------------------------------------------------------------------
 
-#if defined(ANT_WINDOWS)
+#ifdef ANT_WINDOWS
 
 #include "res/TwXCursors.h"
 
+
 void CTwMgr::CreateCursors()
 {
-    //TODO: create cursor
     if( m_CursorsCreated )
         return;
-    m_CursorArrow = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_ARROW));
-    m_CursorMove = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_SIZEALL));
-    m_CursorWE = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_SIZEWE));
-    m_CursorNS = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_SIZENS));
-    m_CursorTopRight = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_SIZENESW));
-    m_CursorTopLeft = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_SIZENWSE));
-    m_CursorBottomLeft = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_SIZENESW));
-    m_CursorBottomRight = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_SIZENWSE));
-    m_CursorHelp = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_HELP));
-    m_CursorCross = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_CROSS));
-    m_CursorUpArrow = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_UPARROW));
-    m_CursorNo = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_NO));
-    m_CursorIBeam = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_IBEAM));
+    m_CursorArrow = LoadCursor(NULL, IDC_ARROW);
+    m_CursorMove = LoadCursor(NULL, IDC_SIZEALL);
+    m_CursorWE = LoadCursor(NULL, IDC_SIZEWE);
+    m_CursorNS = LoadCursor(NULL, IDC_SIZENS);
+    m_CursorTopRight = LoadCursor(NULL, IDC_SIZENESW);
+    m_CursorTopLeft = LoadCursor(NULL, IDC_SIZENWSE);
+    m_CursorBottomLeft = LoadCursor(NULL, IDC_SIZENESW);
+    m_CursorBottomRight = LoadCursor(NULL, IDC_SIZENWSE);
+    m_CursorHelp = LoadCursor(NULL, IDC_HELP);
+    m_CursorCross = LoadCursor(NULL, IDC_CROSS);
+    m_CursorUpArrow = LoadCursor(NULL, IDC_UPARROW);
+    m_CursorNo = LoadCursor(NULL, IDC_NO);
+    m_CursorIBeam = LoadCursor(NULL, IDC_IBEAM);
     #ifdef IDC_HAND
-        m_CursorHand = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_HAND));
+        m_CursorHand = LoadCursor(NULL, IDC_HAND);
     #else
-        m_CursorHand = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_UPARROW));
+        m_CursorHand = LoadCursor(NULL, IDC_UPARROW);
     #endif
     int cur;
     HMODULE hdll = GetModuleHandle(ANT_TWEAK_BAR_DLL);
     if( hdll==NULL )
         g_UseCurRsc = false;    // force the use of built-in cursors (not using resources)
     if( g_UseCurRsc )
-        m_CursorCenter = ::LoadCursor(hdll, MAKEINTRESOURCE(IDC_CURSOR1+0));
+        m_CursorCenter = LoadCursor(hdll, MAKEINTRESOURCE(IDC_CURSOR1+0));
     else
         m_CursorCenter  = PixmapCursor(0);
     if( m_CursorCenter==NULL )
-        m_CursorCenter = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_CROSS));
+        m_CursorCenter = LoadCursor(NULL, IDC_CROSS);
     if( g_UseCurRsc )
-        m_CursorPoint = ::LoadCursor(hdll, MAKEINTRESOURCE(IDC_CURSOR1+1));
+        m_CursorPoint = LoadCursor(hdll, MAKEINTRESOURCE(IDC_CURSOR1+1));
     else
         m_CursorPoint   = PixmapCursor(1);
     if( m_CursorPoint==NULL )
-        m_CursorPoint = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_CROSS));
+        m_CursorPoint = LoadCursor(NULL, IDC_CROSS);
 
     for( cur=0; cur<NB_ROTO_CURSORS; ++cur )
     {
         if( g_UseCurRsc )
-            m_RotoCursors[cur] = ::LoadCursor(hdll, MAKEINTRESOURCE(IDC_CURSOR1+2+cur));
+            m_RotoCursors[cur] = LoadCursor(hdll, MAKEINTRESOURCE(111/*IDC_CURSOR1+2+cur*/));
         else
             m_RotoCursors[cur] = PixmapCursor(cur+2);
         if( m_RotoCursors[cur]==NULL )
-            m_RotoCursors[cur] = ::LoadCursor(NULL ,MAKEINTRESOURCE(IDC_CROSS));
+            m_RotoCursors[cur] = LoadCursor(NULL, IDC_CROSS);
     }
     
     m_CursorsCreated = true;
@@ -6380,7 +6373,10 @@ void CTwMgr::FreeCursors()
 
 void CTwMgr::SetCursor(CTwMgr::CCursor _Cursor)
 {
-    //TODO: set cursor Arrow, IBeam doesn't work
+    if( _Cursor == NULL)
+    {
+        return;
+    }
     if( m_CursorsCreated )
     {
         CURSORINFO ci;

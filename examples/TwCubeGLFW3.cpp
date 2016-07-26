@@ -99,7 +99,7 @@ int main()
     if( !glfwInit() )
     {
         // An error occurred
-        fprintf(stderr, "GLFW initialization failed\n");
+        std::cerr << "GLFW initialization failed" << std::endl;
         return 1;
     }
 

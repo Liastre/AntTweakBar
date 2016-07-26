@@ -11,9 +11,8 @@
 //  ---------------------------------------------------------------------------
 
 
-#if !defined ANT_TW_PRECOMP_INCLUDED
-#define ANT_TW_PRECOMP_INCLUDED
-
+#ifndef ANTTWEAKBAR_ATBPRECOMP_HPP
+#define ANTTWEAKBAR_ATBPRECOMP_HPP
 
 #if defined _MSC_VER
 #   pragma warning(disable: 4514)   // unreferenced inline function has been removed
@@ -31,6 +30,7 @@
 #   pragma warning(pop)
 #endif
 
+// OS specified includes
 #if defined(_UNIX)
 #   define ANT_UNIX
 #   include <X11/cursorfont.h>
@@ -60,12 +60,9 @@
 #   undef ANT_WINDOWS
 #   undef ANT_UNIX
 #elif defined(_WINDOWS) || defined(WIN32) || defined(WIN64) || defined(_WIN32) || defined(_WIN64)
-#   define ANT_WINDOWS
-#   ifndef WIN32_LEAN_AND_MEAN
-#       define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
-#   endif
+#   define  ANT_WINDOWS
+#   define  WIN32_LEAN_AND_MEAN
 #   include <windows.h>
-#   include <shellapi.h>
 #endif
 
-#endif  // !defined ANT_TW_PRECOMP_INCLUDED
+#endif  // ANTTWEAKBAR_ATBPRECOMP_HPP

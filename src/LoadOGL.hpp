@@ -15,7 +15,7 @@
 #define ANT_LOAD_OGL_INCLUDED
 
 #define ANTTWEAKBAR_USE_OPENGL
-#include <ATBIncludes.hpp>
+#include <ATBincludes.hpp>
 
 #define ANT_GL_DECL(_Ret, _Fct, _Params) \
     extern "C" { typedef _Ret (APIENTRY* PFN##_Fct)_Params; } \

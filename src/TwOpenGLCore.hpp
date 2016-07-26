@@ -18,7 +18,7 @@
 #include <vector>
 #include <vector>
 #define ANTTWEAKBAR_USE_OPENGL
-#include <ATBIncludes.hpp>
+#include <ATBincludes.hpp>
 
 
 class CTwGraphOpenGLCore : public ITwGraph

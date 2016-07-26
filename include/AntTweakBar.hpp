@@ -19,7 +19,7 @@
 #ifndef TW_INCLUDED
 #define TW_INCLUDED
 
-#include "ATBIncludes.hpp"
+#include "ATBincludes.hpp"
 #include <cstddef>
 #include <string>
 
@@ -41,12 +41,6 @@
 #   define TW_EXPORT_API
 #   define TW_IMPORT_API
 #endif
-
-/*#ifdef MYDLL_EXPORTS
-#define MYDLL_API __declspec(dllexport)
-#else
-#define MYDLL_API __declspec(dllimport)
-#endif*/
 
 #if defined TW_EXPORTS
 #   define TW_API TW_EXPORT_API
@@ -179,7 +173,7 @@ typedef enum ETwGraphAPI
     TW_OPENGL_CORE      = 5
 } TwGraphAPI;
 
-TW_API int      TW_CALL TwInit(TwGraphAPI graphAPI, void *device);
+TW_API int      TwInit(TwGraphAPI graphAPI, void *device);
 TW_API int      TW_CALL TwTerminate();
 
 TW_API int      TW_CALL TwDraw();
