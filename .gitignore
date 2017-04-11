@@ -28,3 +28,4 @@ lib/*.so
 lib/*.so.*
 .idea/
 thirdparty/
+cmake-build-debug/
