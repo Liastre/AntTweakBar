@@ -16,7 +16,6 @@
 #===================================
 #========= SEARCH HEADERS ==========
 #===================================
-# search for GL/freeglut.h
 find_path(FREEGLUT_INCLUDE_DIR
     NAMES
         GL/freeglut.h
@@ -36,7 +35,7 @@ find_library(FREEGLUT_LIBRARY
     NAMES
         freeglut_static
         freeglut
-    PATH
+    PATHS
         $ENV{lib}
         /usr/lib
         /usr/local/lib
@@ -47,13 +46,13 @@ find_library(FREEGLUT_LIBRARY
 #===================================
 #========== SET UP OUTPUT ==========
 #===================================
-mark_as_advanced(GLFW3_INCLUDE_DIR GLFW3_LIBRARY)
-set(FREEGLUT_INCLUDE_DIRS ${FREEGLUT_INCLUDE_DIR})
-set(FREEGLUT_LIBRARIES ${FREEGLUT_LIBRARY})
-
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(FREEGLUT
     REQUIRED_VARS
-        FREEGLUT_LIBRARIES
-        FREEGLUT_INCLUDE_DIRS
+        FREEGLUT_LIBRARY
+        FREEGLUT_INCLUDE_DIR
     )
+mark_as_advanced(GLFW3_INCLUDE_DIR GLFW3_LIBRARY)
+
+set(FREEGLUT_INCLUDE_DIRS ${FREEGLUT_INCLUDE_DIR})
+set(FREEGLUT_LIBRARIES ${FREEGLUT_LIBRARY})

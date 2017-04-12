@@ -16,13 +16,12 @@
 #===================================
 #========= SEARCH HEADERS ==========
 #===================================
-# search for glfw3.h
 find_path(GLFW3_INCLUDE_DIR
     NAMES
         GLFW/glfw3.h
     HINTS
-        "${GLFW3_LOCATION}/include"
-        "$ENV{GLFW3_LOCATION}/include"
+        "${GLFW3_LOCATION}"
+        "$ENV{GLFW3_LOCATION}"
     PATHS
         "$ENV{PROGRAMFILES}/GLFW"
         "${OPENGL_INCLUDE_DIR}"
@@ -132,15 +131,15 @@ if(GLFW3_INCLUDE_DIR AND GLFW3_LIBRARY)
     set(GLFW3_FOUND TRUE)
 endif()
 
-mark_as_advanced(GLFW3_INCLUDE_DIR GLFW3_LIBRARY)
-set(GLFW3_INCLUDE_DIRS ${GLFW3_INCLUDE_DIR})
-set(GLFW3_LIBRARIES ${GLFW3_LIBRARY})
-
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(GLFW3
     REQUIRED_VARS
-        GLFW3_LIBRARIES
-        GLFW3_INCLUDE_DIRS
+        GLFW3_LIBRARY
+        GLFW3_INCLUDE_DIR
     VERSION_VAR
         GLFW_VERSION
     )
+mark_as_advanced(GLFW3_INCLUDE_DIR GLFW3_LIBRARY)
+
+set(GLFW3_INCLUDE_DIRS ${GLFW3_INCLUDE_DIR})
+set(GLFW3_LIBRARIES ${GLFW3_LIBRARY})
