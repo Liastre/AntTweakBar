@@ -13,12 +13,11 @@
 //
 //  ---------------------------------------------------------------------------
 
-#define ANTTWEAKBAR_USE_OPENGL
-#define ANTTWEAKBAR_USE_SFML2
+#define ANTTWEAKBAR_OPENGL
+#define ANTTWEAKBAR_SFML2
 #include <AntTweakBar.hpp>
 
 #include <list>
-#include <cstdlib>
 
 
 // Pseudo-random value between -1 and 1

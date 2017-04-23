@@ -12,8 +12,8 @@
 //  
 //  ---------------------------------------------------------------------------
 
-#define ANTTWEAKBAR_USE_OPENGL
-#define ANTTWEAKBAR_USE_GLUT
+#define ANTTWEAKBAR_OPENGL
+#define ANTTWEAKBAR_FREEGLUT
 #include <AntTweakBar.hpp>
 
 #include <math.h>

@@ -5,13 +5,14 @@
 # FindSDL2
 # -------
 #
-# Try to find the FREEGLUT library.
+# Try to find the SDL2 library.
 #
 # This will define the following variables:
 #
 #   SDL2_FOUND         - true if library found
 #   SDL2_INCLUDE_DIRS  - path to library headers
 #   SDL2_LIBRARIES     - path to library itself
+#   SDL2_DEFINITIONS   - platform based compiler flags
 
 #===================================
 #========= SEARCH HEADERS ==========
@@ -66,6 +67,7 @@ find_library(SDL2_LIBRARY
     PATHS
         ${SDL2_PATHS}
     PATH_SUFFIXES
+        bin
         lib
         lib64
     )
@@ -83,9 +85,22 @@ find_library(SDL2MAIN_LIBRARY
         lib64
     )
 
+#===================================
+#========== DEPENDENCIES ===========
+#===================================
+# environment
 if(MINGW)
-    set(ENVIRONMENT_LIBRARIES mingw32)
-endif(MINGW)
+    set(ENVIRONMENT_LIBRARIES ${ENVIRONMENT_LIBRARIES} mingw32)
+endif()
+
+# dependencies
+if(WIN32)
+    set(SDL2_DEFINITION
+        winmm
+        imm32
+        version
+        )
+endif(WIN32)
 
 #===================================
 #========== SET UP OUTPUT ==========
@@ -99,5 +114,10 @@ find_package_handle_standard_args(SDL2
     )
 mark_as_advanced(SDL2_INCLUDE_DIR SDL2_LIBRARY)
 
-set(SDL2_INCLUDE_DIRS ${SDL2_INCLUDE_DIR})
-set(SDL2_LIBRARIES ${ENVIRONMENT_LIBRARIES} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY})
+if(SDL2_FOUND)
+    set(SDL2_INCLUDE_DIRS ${SDL2_INCLUDE_DIR})
+    set(SDL2_LIBRARIES ${ENVIRONMENT_LIBRARIES} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_DEFINITION})
+else()
+    set(SDL2_LIBRARIES ${ENVIRONMENT_LIBRARIES})
+    set(SDL2_DEFINITIONS ${SDL2_DEFINITION})
+endif()

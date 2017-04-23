@@ -22,8 +22,8 @@
 //
 //  ---------------------------------------------------------------------------
 
-#define ANTTWEAKBAR_USE_OPENGL
-#define ANTTWEAKBAR_USE_GLFW3
+#define ANTTWEAKBAR_OPENGL
+#define ANTTWEAKBAR_GLFW3
 #include <AntTweakBar.hpp>
 
 #include <cmath>

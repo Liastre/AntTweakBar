@@ -11,7 +11,7 @@
 //
 //  ---------------------------------------------------------------------------
 
-#define ANTTWEAKBAR_USE_GLFW3
+#define ANTTWEAKBAR_GLFW3
 #include <AntTweakBar.hpp>
 
 

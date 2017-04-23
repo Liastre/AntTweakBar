@@ -271,7 +271,7 @@ TW_API void     TW_CALL TwHandleErrors(TwErrorHandler errorHandler);
 #define TwEventWin32    TwEventWin // For compatibility with AntTweakBar versions prior to 1.11
 
 // GLFW events callbacks
-#ifdef ANTTWEAKBAR_USE_GLFW3
+#ifdef ANTTWEAKBAR_GLFW3
     // Callbacks that returning error code:
     TW_IMPORT_API int twCursorPosCallbackGLFW_d(GLFWwindow* window, double posX, double posY);
     TW_IMPORT_API int twMouseButtonCallbackGLFW_d(GLFWwindow* window, int button, int action, int mods);
@@ -287,7 +287,7 @@ TW_API void     TW_CALL TwHandleErrors(TwErrorHandler errorHandler);
 #endif
 
 // GLUT event callbacks
-#ifdef ANTTWEAKBAR_USE_GLUT
+#ifdef ANTTWEAKBAR_FREEGLUT
     TW_IMPORT_API int  twSetModifiersFuncPointerGLUT(int (TW_CALL *glutModifiersFuncPointer)(void));
     // Callbacks that returning error code:
     TW_IMPORT_API int twCursorPosCallbackGLUT_d (int posX, int posY);
@@ -302,12 +302,12 @@ TW_API void     TW_CALL TwHandleErrors(TwErrorHandler errorHandler);
 #endif
 
 // SDL2 event loop
-#ifdef ANTTWEAKBAR_USE_SDL2
+#ifdef ANTTWEAKBAR_SDL2
     TW_IMPORT_API int TwEventSDL2(const void *sdlEvent);
 #endif
 
 // SFML event loop
-#ifdef ANTTWEAKBAR_USE_SFML2
+#ifdef ANTTWEAKBAR_SFML2
     TW_IMPORT_API int TwEventSFML2(const void *sfmlEvent);
 #endif
 

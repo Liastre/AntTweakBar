@@ -17,7 +17,7 @@
 #include "TwGraph.hpp"
 #include <vector>
 #include <vector>
-#define ANTTWEAKBAR_USE_OPENGL
+#define ANTTWEAKBAR_OPENGL
 #include <ATBincludes.hpp>
 
 

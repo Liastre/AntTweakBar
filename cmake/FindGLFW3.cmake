@@ -102,9 +102,9 @@ elseif()
 endif()
 
 #===================================
-#=========== FUNCTIONS =============
+#========= PARSE VERSION ===========
 #===================================
-# parse GLFW header
+# function to parse GLFW header
 function(parseversion FILENAME VARNAME)
     set(PATTERN "^#define ${VARNAME}.*$")
     file(STRINGS "${GLFW3_INCLUDE_DIR}/${FILENAME}" TMP REGEX ${PATTERN})
@@ -112,34 +112,33 @@ function(parseversion FILENAME VARNAME)
     set(${VARNAME} ${TMP} PARENT_SCOPE)
 endfunction()
 
+# get GLFW version
+if(GLFW3_INCLUDE_DIR)
+    if(EXISTS "${GLFW3_INCLUDE_DIR}/GLFW/glfw3.h")
+        parseversion(GLFW/glfw3.h GLFW3_VERSION_MAJOR)
+        parseversion(GLFW/glfw3.h GLFW3_VERSION_MINOR)
+        parseversion(GLFW/glfw3.h GLFW3_VERSION_REVISION)
+    endif()
+
+    if(${GLFW3_VERSION_MAJOR} OR ${GLFW3_VERSION_MINOR} OR ${GLFW3_VERSION_REVISION})
+        set(GLFW3_VERSION "${GLFW3_VERSION_MAJOR}.${GLFW3_VERSION_MINOR}.${GLFW3_VERSION_REVISION}")
+    endif()
+endif()
+
 #===================================
 #========== SET UP OUTPUT ==========
 #===================================
-if(GLFW3_INCLUDE_DIR AND GLFW3_LIBRARY)
-    # get GLFW version from the lib headers
-    if(EXISTS "${GLFW3_INCLUDE_DIR}/GLFW/glfw3.h")
-        parseversion(GLFW/glfw3.h GLFW_VERSION_MAJOR)
-        parseversion(GLFW/glfw3.h GLFW_VERSION_MINOR)
-        parseversion(GLFW/glfw3.h GLFW_VERSION_REVISION)
-    endif()
-
-    if(${GLFW_VERSION_MAJOR} OR ${GLFW_VERSION_MINOR} OR ${GLFW_VERSION_REVISION})
-        set(GLFW_VERSION "${GLFW_VERSION_MAJOR}.${GLFW_VERSION_MINOR}.${GLFW_VERSION_REVISION}")
-        mark_as_advanced(GLFW_VERSION)
-    endif()
-
-    set(GLFW3_FOUND TRUE)
-endif()
-
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(GLFW3
     REQUIRED_VARS
         GLFW3_LIBRARY
         GLFW3_INCLUDE_DIR
     VERSION_VAR
-        GLFW_VERSION
+        GLFW3_VERSION
     )
 mark_as_advanced(GLFW3_INCLUDE_DIR GLFW3_LIBRARY)
 
-set(GLFW3_INCLUDE_DIRS ${GLFW3_INCLUDE_DIR})
-set(GLFW3_LIBRARIES ${GLFW3_LIBRARY})
+if(GLFW3_FOUND)
+    set(GLFW3_INCLUDE_DIRS ${GLFW3_INCLUDE_DIR})
+    set(GLFW3_LIBRARIES ${GLFW3_LIBRARY})
+endif()

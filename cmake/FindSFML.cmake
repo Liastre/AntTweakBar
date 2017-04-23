@@ -37,28 +37,27 @@
 # Output
 # ------
 #
-# This script defines the following variables:
-# - For each specified module XXX (system, window, graphics, network, audio, main):
-#   - SFML_XXX_LIBRARY_DEBUG:   the name of the debug library of the xxx module (set to SFML_XXX_LIBRARY_RELEASE is no debug version is found)
-#   - SFML_XXX_LIBRARY_RELEASE: the name of the release library of the xxx module (set to SFML_XXX_LIBRARY_DEBUG is no release version is found)
-#   - SFML_XXX_LIBRARY:         the name of the library to link to for the xxx module (includes both debug and optimized names if necessary)
-#   - SFML_XXX_FOUND:           true if either the debug or release library of the xxx module is found
-#   - SFML_XXX_DEPENDENCIES:    the list of libraries the module depends on, in case of static linking
-# - SFML_LIBRARIES:    the list of all libraries corresponding to the required modules
-# - SFML_FOUND:        true if all the required modules are found
-# - SFML_INCLUDE_DIR:  the path where SFML headers are located (the directory containing the SFML/Config.hpp file)
-# - SFML_DEPENDENCIES: the list of libraries SFML depends on, in case of static linking
+# This will define the following variables:
+#
+#   SFML_FOUND         - true if all the required modules are found
+#   SFML_INCLUDE_DIRS  - the path where SFML headers are located
+#   SFML_LIBRARIES     - the list of all libraries corresponding to the required modules
+#   SFML_DEFINITIONS   - library definitions
+#   SFML_DEPENDENCIES  - the list of libraries SFML depends on, in case of static linking
+#
+# Component specific variables (window graphics audio):
+#
+#   SFML_XXX_LIBRARY_DEBUG    - the name of the debug library of the xxx module (set to SFML_XXX_LIBRARY_RELEASE is no debug version is found)
+#   SFML_XXX_LIBRARY_RELEASE  - the name of the release library of the xxx module (set to SFML_XXX_LIBRARY_DEBUG is no release version is found)
+#   SFML_XXX_LIBRARY          - the name of the library to link to for the xxx module (includes both debug and optimized names if necessary)
+#   SFML_XXX_FOUND            - true if either the debug or release library of the xxx module is found
+#   SFML_XXX_DEPENDENCIES     - the list of libraries the module depends on, in case of static linking
 #
 # example:
 #   find_package(SFML 2 COMPONENTS system window graphics audio REQUIRED)
 #   include_directories(${SFML_INCLUDE_DIR})
 #   add_executable(myapp ...)
 #   target_link_libraries(myapp ${SFML_LIBRARIES})
-
-# define the SFML_STATIC macro if static build was chosen
-if(SFML_STATIC_LIBRARIES)
-    add_definitions(-DSFML_STATIC)
-endif()
 
 # define the list of search paths for headers and libraries
 set(FIND_SFML_PATHS
@@ -73,51 +72,21 @@ set(FIND_SFML_PATHS
     /opt/csw
     /opt)
 
-# find the SFML include directory
-find_path(SFML_INCLUDE_DIR SFML/Config.hpp
-          PATH_SUFFIXES include
-          PATHS ${FIND_SFML_PATHS})
+#===================================
+#========= SEARCH HEADERS ==========
+#===================================
+find_path(SFML_INCLUDE_DIR
+    NAMES
+        SFML/Config.hpp
+    PATHS
+        ${FIND_SFML_PATHS}
+    PATH_SUFFIXES
+        include
+    )
 
-# check the version number
-set(SFML_VERSION_OK TRUE)
-if(SFML_FIND_VERSION AND SFML_INCLUDE_DIR)
-    # extract the major and minor version numbers from SFML/Config.hpp
-    # we have to handle framework a little bit differently:
-    if("${SFML_INCLUDE_DIR}" MATCHES "SFML.framework")
-        set(SFML_CONFIG_HPP_INPUT "${SFML_INCLUDE_DIR}/Headers/Config.hpp")
-    else()
-        set(SFML_CONFIG_HPP_INPUT "${SFML_INCLUDE_DIR}/SFML/Config.hpp")
-    endif()
-    FILE(READ "${SFML_CONFIG_HPP_INPUT}" SFML_CONFIG_HPP_CONTENTS)
-    STRING(REGEX REPLACE ".*#define SFML_VERSION_MAJOR ([0-9]+).*" "\\1" SFML_VERSION_MAJOR "${SFML_CONFIG_HPP_CONTENTS}")
-    STRING(REGEX REPLACE ".*#define SFML_VERSION_MINOR ([0-9]+).*" "\\1" SFML_VERSION_MINOR "${SFML_CONFIG_HPP_CONTENTS}")
-    STRING(REGEX REPLACE ".*#define SFML_VERSION_PATCH ([0-9]+).*" "\\1" SFML_VERSION_PATCH "${SFML_CONFIG_HPP_CONTENTS}")
-    if (NOT "${SFML_VERSION_PATCH}" MATCHES "^[0-9]+$")
-        set(SFML_VERSION_PATCH 0)
-    endif()
-    math(EXPR SFML_REQUESTED_VERSION "${SFML_FIND_VERSION_MAJOR} * 10000 + ${SFML_FIND_VERSION_MINOR} * 100 + ${SFML_FIND_VERSION_PATCH}")
-
-    # if we could extract them, compare with the requested version number
-    if (SFML_VERSION_MAJOR)
-        # transform version numbers to an integer
-        math(EXPR SFML_VERSION "${SFML_VERSION_MAJOR} * 10000 + ${SFML_VERSION_MINOR} * 100 + ${SFML_VERSION_PATCH}")
-
-        # compare them
-        if(SFML_VERSION LESS SFML_REQUESTED_VERSION)
-            set(SFML_VERSION_OK FALSE)
-        endif()
-    else()
-        # SFML version is < 2.0
-        if (SFML_REQUESTED_VERSION GREATER 10900)
-            set(SFML_VERSION_OK FALSE)
-            set(SFML_VERSION_MAJOR 1)
-            set(SFML_VERSION_MINOR x)
-            set(SFML_VERSION_PATCH x)
-        endif()
-    endif()
-endif()
-
-# find the requested modules
+#===================================
+#======== SEARCH LIBRARIES =========
+#===================================
 set(SFML_FOUND TRUE) # will be set to false if one of the required modules is not found
 foreach(FIND_SFML_COMPONENT ${SFML_FIND_COMPONENTS})
     string(TOLOWER ${FIND_SFML_COMPONENT} FIND_SFML_COMPONENT_LOWER)
@@ -219,12 +188,11 @@ foreach(FIND_SFML_COMPONENT ${SFML_FIND_COMPONENTS})
                      SFML_${FIND_SFML_COMPONENT_UPPER}_LIBRARY_DYNAMIC_DEBUG)
 
     # add to the global list of libraries
-    set(SFML_LIBRARIES ${SFML_LIBRARIES} "${SFML_${FIND_SFML_COMPONENT_UPPER}_LIBRARY}")
+    set(SFML_LIBRARY ${SFML_LIBRARY} "${SFML_${FIND_SFML_COMPONENT_UPPER}_LIBRARY}")
 endforeach()
 
 # in case of static linking, we must also define the list of all the dependencies of SFML libraries
 if(SFML_STATIC_LIBRARIES)
-
     # detect the OS
     if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         set(FIND_SFML_OS_WINDOWS 1)
@@ -337,6 +305,55 @@ if(SFML_STATIC_LIBRARIES)
 
 endif()
 
+#===================================
+#========= PARSE VERSION ===========
+#===================================
+# check the version number
+set(SFML_VERSION_OK TRUE)
+if(SFML_FIND_VERSION AND SFML_INCLUDE_DIR)
+    # extract the major and minor version numbers from SFML/Config.hpp
+    # we have to handle framework a little bit differently:
+    if("${SFML_INCLUDE_DIR}" MATCHES "SFML.framework")
+        set(SFML_CONFIG_HPP_INPUT "${SFML_INCLUDE_DIR}/Headers/Config.hpp")
+    else()
+        set(SFML_CONFIG_HPP_INPUT "${SFML_INCLUDE_DIR}/SFML/Config.hpp")
+    endif()
+    FILE(READ "${SFML_CONFIG_HPP_INPUT}" SFML_CONFIG_HPP_CONTENTS)
+    STRING(REGEX REPLACE ".*#define SFML_VERSION_MAJOR ([0-9]+).*" "\\1" SFML_VERSION_MAJOR "${SFML_CONFIG_HPP_CONTENTS}")
+    STRING(REGEX REPLACE ".*#define SFML_VERSION_MINOR ([0-9]+).*" "\\1" SFML_VERSION_MINOR "${SFML_CONFIG_HPP_CONTENTS}")
+    STRING(REGEX REPLACE ".*#define SFML_VERSION_PATCH ([0-9]+).*" "\\1" SFML_VERSION_PATCH "${SFML_CONFIG_HPP_CONTENTS}")
+    if (NOT "${SFML_VERSION_PATCH}" MATCHES "^[0-9]+$")
+        set(SFML_VERSION_PATCH 0)
+    endif()
+    math(EXPR SFML_REQUESTED_VERSION "${SFML_FIND_VERSION_MAJOR} * 10000 + ${SFML_FIND_VERSION_MINOR} * 100 + ${SFML_FIND_VERSION_PATCH}")
+
+    # if we could extract them, compare with the requested version number
+    if (SFML_VERSION_MAJOR)
+        # transform version numbers to an integer
+        math(EXPR SFML_VERSION "${SFML_VERSION_MAJOR} * 10000 + ${SFML_VERSION_MINOR} * 100 + ${SFML_VERSION_PATCH}")
+
+        # compare them
+        if(SFML_VERSION LESS SFML_REQUESTED_VERSION)
+            set(SFML_VERSION_OK FALSE)
+        endif()
+    else()
+        # SFML version is < 2.0
+        if (SFML_REQUESTED_VERSION GREATER 10900)
+            set(SFML_VERSION_OK FALSE)
+            set(SFML_VERSION_MAJOR 1)
+            set(SFML_VERSION_MINOR x)
+            set(SFML_VERSION_PATCH x)
+        endif()
+    endif()
+endif()
+
+# get SFML version
+if(SFML_INCLUDE_DIR)
+    if(SFML_VERSION_MAJOR AND SFML_VERSION_MINOR AND SFML_VERSION_PATCH)
+        set(SFML_VERSION ${SFML_VERSION_MAJOR}.${SFML_VERSION_MINOR}.${SFML_VERSION_PATCH})
+    endif()
+endif()
+
 # handle errors
 if(NOT SFML_VERSION_OK)
     # SFML version not ok
@@ -359,7 +376,30 @@ if (NOT SFML_FOUND)
     endif()
 endif()
 
-# handle success
-if(SFML_FOUND AND NOT SFML_FIND_QUIETLY)
-    message(STATUS "Found SFML ${SFML_VERSION_MAJOR}.${SFML_VERSION_MINOR}.${SFML_VERSION_PATCH} in ${SFML_INCLUDE_DIR}")
+#===================================
+#========== DEPENDENCIES ===========
+#===================================
+# define the SFML_STATIC macro if static build was chosen
+if(SFML_STATIC_LIBRARIES)
+    set(SFML_DEFINITION SFML_STATIC=ON)
 endif()
+
+#===================================
+#========== SET UP OUTPUT ==========
+#===================================
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(SFML
+    REQUIRED_VARS
+        SFML_LIBRARY
+        SFML_INCLUDE_DIR
+    VERSION_VAR
+        SFML_VERSION
+    )
+mark_as_advanced(SFML_INCLUDE_DIR SFML_LIBRARY)
+
+if(SFML_FOUND AND NOT SFML_FIND_QUIETLY)
+    set(SFML_LIBRARIES ${SFML_LIBRARY})
+    set(SFML_INCLUDE_DIRS ${SFML_INCLUDE_DIR})
+    set(SFML_DEFINITIONS ${SFML_DEFINITION})
+endif()
+

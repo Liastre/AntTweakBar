@@ -14,7 +14,7 @@
 #ifndef ANT_LOAD_OGL_CORE_INCLUDED
 #define ANT_LOAD_OGL_CORE_INCLUDED
 
-#define ANTTWEAKBAR_USE_OPENGL
+#define ANTTWEAKBAR_OPENGL
 #include <ATBincludes.hpp>
 
 

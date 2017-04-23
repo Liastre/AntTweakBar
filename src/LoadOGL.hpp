@@ -14,7 +14,7 @@
 #ifndef ANT_LOAD_OGL_INCLUDED
 #define ANT_LOAD_OGL_INCLUDED
 
-#define ANTTWEAKBAR_USE_OPENGL
+#define ANTTWEAKBAR_OPENGL
 #include <ATBincludes.hpp>
 
 #define ANT_GL_DECL(_Ret, _Fct, _Params) \

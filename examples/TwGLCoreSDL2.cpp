@@ -12,8 +12,8 @@
 //
 //  ---------------------------------------------------------------------------
 
-#define ANTTWEAKBAR_USE_OPENGL
-#define ANTTWEAKBAR_USE_SDL2
+#define ANTTWEAKBAR_OPENGL
+#define ANTTWEAKBAR_SDL2
 #include <AntTweakBar.hpp>
 
 //#define GL3_PROTOTYPES 1 ////

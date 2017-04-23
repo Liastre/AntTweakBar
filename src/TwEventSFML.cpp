@@ -11,7 +11,7 @@
 //
 //  ---------------------------------------------------------------------------
 
-#define ANTTWEAKBAR_USE_SFML2
+#define ANTTWEAKBAR_SFML2
 #include <AntTweakBar.hpp>
 
 

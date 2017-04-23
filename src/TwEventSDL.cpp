@@ -14,7 +14,7 @@
 //
 //  ---------------------------------------------------------------------------
 
-#define ANTTWEAKBAR_USE_SDL2
+#define ANTTWEAKBAR_SDL2
 #include <AntTweakBar.hpp>
 
 
